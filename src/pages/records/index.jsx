@@ -82,14 +82,14 @@ const Records = () => {
       website: "Signature New",
       domain: "https://www.thesignaturestudio.in/new",
       title: "Signature New",
-      route: "lander4",
+      route: "lander42",
     },
     {
       id: "#REC-049",
       website: "Signature New 2",
       domain: "https://www.thesignaturestudio.in/signature-new ",
       title: "Signature New 2",
-      route: "",
+      route: "rag",
     },
     {
       id: "#REC-050",
@@ -110,7 +110,7 @@ const Records = () => {
       website: "Sister",
       domain: "https://www.easyastro.in/sister",
       title: "Sister",
-      route: "",
+      route: "lander3",
     },
     {
       id: "#REC-053",

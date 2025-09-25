@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -39,7 +39,7 @@ const DetailPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalOrders, setTotalOrders] = useState(0);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [itemsPerPage] = useState(1000);
 
   // Check if device is mobile
   React.useEffect(() => {
@@ -70,12 +70,23 @@ const DetailPage = () => {
   };
 
   // Fetch order data from API
-  const fetchOrderData = async (page = 1, limit = 10) => {
+  const fetchOrderData = useCallback(async (page = 1, limit = 10) => {
     try {
       setLoading(true);
       setError(null);
-      
-      const response = await fetch(`https://skyscale-be.onrender.com/api/${id}/get-order/main?page=${page}&limit=${limit}`);
+      let url = "";
+
+      if (id === "rag" || id === "lander42") {
+        if (id === "lander42") {
+          url = `https://signature-backend-bm3q.onrender.com/api/lander4/get-orders/main?page=${page}&limit=${limit}`;
+        } else {
+          url = `https://signature-backend-bm3q.onrender.com/api/signature/${id}/get-orders/main?page=${page}&limit=${limit}`;
+        }
+      } else {
+        url = `https://skyscale-be.onrender.com/api/${id}/get-order/main?page=${page}&limit=${limit}`;
+      }
+
+      const response = await fetch(url);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -83,30 +94,59 @@ const DetailPage = () => {
       
       const data = await response.json();
       
-      // Transform the API data to match our component's expected structure
-      const orders = data.data?.orders || data.orders || data.data || data || [];
-      const transformedOrders = orders.map((order, index) => ({
-        orderId: order.orderId || order._id || `ORD-${Date.now()}-${index + 1}`,
-        name: order.fullName || order.name || order.customerName || 'Unknown Customer',
+      // Handle both old format (data.orders) and new signature format (data array)
+      let ordersArray;
+      if (Array.isArray(data)) {
+        // New signature backend format - data is directly an array
+        ordersArray = data;
+      } else if (data.data && Array.isArray(data.data)) {
+        // New signature format - data.data is an array
+        ordersArray = data.data;
+      } else if (data.data?.orders) {
+        // Old format - data.data.orders contains the array
+        ordersArray = data.data.orders;
+      } else if (data.orders) {
+        // Alternative old format - data.orders contains the array
+        ordersArray = data.orders;
+      } else {
+        // Fallback to empty array
+        ordersArray = [];
+      }
+
+      const transformedOrders = ordersArray.map((order, index) => ({
+        orderId: order.abdOrderId || order.orderId || order._id || `ORD-${Date.now()}-${index + 1}`,
+        name: order.fullName || order.name || order.customerName || 'N/A',
         email: order.email || order.customerEmail || 'N/A',
         phone: order.phoneNumber || order.phone || order.customerPhone || 'N/A',
         additionalProducts: Array.isArray(order.additionalProducts) 
-          ? (order.additionalProducts.length > 0 ? order.additionalProducts.join(', ') : 'Basic Plan')
-          : (order.additionalProducts || order.products || order.items || 'Basic Plan'),
+          ? (order.additionalProducts.length > 0 ? order.additionalProducts.join(', ') : order.profession || 'Basic Plan')
+          : (order.additionalProducts || order.profession || order.products || order.items || 'Basic Plan'),
         amount: order.amount ? `₹${parseFloat(order.amount).toFixed(2)}` : '₹0.00',
         orderDate: order.orderDate || order.createdAt || new Date().toISOString(),
-        dob: order.dob,
-        gender: order.gender,
-        placeOfBirth: order.placeOfBirth,
+        dob: order.dob || 'N/A',
+        gender: order.gender || 'N/A',
+        placeOfBirth: order.placeOfBirth || order.remarks || 'N/A',
         razorpayPaymentId: order.razorpayPaymentId
       }));
       
       setOrderData(transformedOrders);
       
-      // Handle pagination based on API response or estimate
-      const totalCount = data.total || data.totalCount || data.count || transformedOrders.length;
-      const apiTotalPages = data.data?.totalPages || data.totalPages || Math.ceil(totalCount / limit);
-      const apiCurrentPage = parseInt(data.data?.currentPage || data.currentPage || page);
+      // Handle pagination data for both formats
+      let totalCount = transformedOrders.length;
+      let apiTotalPages = 1;
+      let apiCurrentPage = page;
+
+      if (Array.isArray(data) || (data.data && Array.isArray(data.data))) {
+        // New signature format - assume single page for now
+        totalCount = ordersArray.length;
+        apiTotalPages = 1;
+        apiCurrentPage = 1;
+      } else {
+        // Old format with pagination info
+        totalCount = data.total || data.totalCount || data.count || transformedOrders.length;
+        apiTotalPages = data.data?.totalPages || data.totalPages || Math.ceil(totalCount / limit);
+        apiCurrentPage = parseInt(data.data?.currentPage || data.currentPage || page);
+      }
       
       setTotalPages(apiTotalPages);
       setTotalOrders(totalCount);
@@ -122,12 +162,12 @@ const DetailPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
   // Fetch data on component mount and when page or items per page changes
   useEffect(() => {
     fetchOrderData(currentPage, itemsPerPage);
-  }, [currentPage, itemsPerPage]);
+  }, [currentPage, itemsPerPage, fetchOrderData]);
 
   // Filter data based on date range and search
   const filteredData = useMemo(() => {
@@ -206,7 +246,7 @@ const DetailPage = () => {
   }, [filteredData]);
 
   const exportToCSV = () => {
-    const headers = ['Order ID', 'Name', 'Email', 'Phone', 'Place of Birth', 'Gender', 'Additional Products', 'Amount', 'Order Date'];
+    const headers = ['Order ID', 'Name', 'Email', 'Phone', 'Place of Birth/Remarks', 'Gender', 'Products/Profession', 'Amount', 'Order Date'];
     const csvContent = [
       headers.join(','),
       ...filteredData.map(order => [
@@ -473,20 +513,6 @@ const DetailPage = () => {
                     <option value="custom">Custom Range</option>
                   </select>
                   
-                  <select
-                    value={itemsPerPage}
-                    onChange={(e) => {
-                      setItemsPerPage(parseInt(e.target.value));
-                      setCurrentPage(1); // Reset to first page when changing items per page
-                    }}
-                    className="px-3 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 flex-shrink-0"
-                  >
-                    <option value={5}>5 per page</option>
-                    <option value={10}>10 per page</option>
-                    <option value={20}>20 per page</option>
-                    <option value={50}>50 per page</option>
-                    <option value={100}>100 per page</option>
-                  </select>
                   
                   {dateFilter === 'custom' && (
                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
@@ -523,7 +549,7 @@ const DetailPage = () => {
                       Loading orders...
                     </div>
                   ) : (
-                    `Showing ${filteredData.length} orders`
+                    `Showing ${((currentPage - 1) * itemsPerPage) + 1}-${Math.min(currentPage * itemsPerPage, totalOrders)} of ${totalOrders} orders`
                   )}
                 </CardDescription>
               </CardHeader>
@@ -537,8 +563,8 @@ const DetailPage = () => {
                         <th className="text-left p-3 font-medium">Name</th>
                         <th className="text-left p-3 font-medium">Email</th>
                         <th className="text-left p-3 font-medium">Phone</th>
-                        <th className="text-left p-3 font-medium">Place of Birth</th>
-                        <th className="text-left p-3 font-medium">Additional Products</th>
+                        <th className="text-left p-3 font-medium">Place of Birth/Remarks</th>
+                        <th className="text-left p-3 font-medium">Products/Profession</th>
                         <th className="text-left p-3 font-medium">Amount</th>
                         <th className="text-left p-3 font-medium">Order Date</th>
                       </tr>
@@ -659,7 +685,7 @@ const DetailPage = () => {
                 {!loading && totalPages > 1 && (
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-6 pt-4 border-t border-border gap-4">
                     <div className="text-sm text-muted-foreground">
-                    Page {currentPage} of {totalPages}
+                      Page {currentPage} of {totalPages} ({totalOrders} total orders)
                     </div>
                     <div className="flex items-center gap-2">
                       <Button
