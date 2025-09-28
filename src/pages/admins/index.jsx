@@ -1,0 +1,375 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '../../components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
+import { Badge } from '../../components/ui/badge';
+import Sidebar from '../../components/Sidebar';
+import { 
+  Users, 
+  Plus, 
+  Edit, 
+  Trash2, 
+  Search, 
+  Filter,
+  Loader2,
+  UserPlus,
+  Shield,
+  Mail,
+  Calendar,
+  Activity
+} from 'lucide-react';
+
+const Admins = () => {
+  const [admins, setAdmins] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterRole, setFilterRole] = useState('all');
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const navigate = useNavigate();
+
+  // Check if device is mobile
+  React.useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+      // Auto-collapse sidebar on mobile
+      if (window.innerWidth < 768) {
+        setSidebarCollapsed(true);
+      }
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  useEffect(() => {
+    fetchAdmins();
+  }, []);
+
+  const fetchAdmins = async () => {
+    try {
+      setIsLoading(true);
+      setError('');
+      
+      const response = await fetch('https://skyscale-be.onrender.com/api/auth/get-all', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        // Handle the response structure: { message: "...", users: [...] }
+        setAdmins(data.users || data.admins || data); 
+      } else {
+        setError('Failed to fetch admins');
+      }
+    } catch {
+      setError('Network error. Please check your connection and try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDeleteAdmin = async (adminId) => {
+    if (!window.confirm('Are you sure you want to delete this admin?')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`https://skyscale-be.onrender.com/api/auth/delete/${adminId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        // Remove admin from local state
+        setAdmins(admins.filter(admin => admin.id !== adminId));
+      } else {
+        setError('Failed to delete admin');
+      }
+    } catch {
+      setError('Network error while deleting admin');
+    }
+  };
+
+  const getRoleBadgeVariant = (role) => {
+    switch (role?.toLowerCase()) {
+      case 'admin':
+        return 'default';
+      case 'signature':
+        return 'secondary';
+      case 'astro':
+        return 'destructive';
+      default:
+        return 'outline';
+    }
+  };
+
+  const filteredAdmins = admins.filter(admin => {
+    const matchesSearch = admin.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         admin.email?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesRole = filterRole === 'all' || admin.role?.toLowerCase() === filterRole.toLowerCase();
+    return matchesSearch && matchesRole;
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen bg-background">
+        <Sidebar 
+          collapsed={sidebarCollapsed} 
+          onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} 
+        />
+        <main className="flex-1 overflow-auto scrollbar-thin flex items-center justify-center">
+          <div className="flex flex-col items-center space-y-4">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="text-muted-foreground">Loading admins...</p>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex h-screen bg-background">
+      <Sidebar 
+        collapsed={sidebarCollapsed} 
+        onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} 
+      />
+      
+      <main className="flex-1 overflow-auto scrollbar-thin">
+        {/* Header */}
+        <header className="sticky top-0 z-10 glass-effect border-b border-border">
+          <div className="flex h-16 items-center justify-between px-4 md:px-6">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-xl md:text-2xl font-bold truncate flex items-center gap-2">
+                <Users className="h-6 w-6" />
+                Admin Management
+              </h1>
+              <p className="text-sm text-muted-foreground hidden sm:block">
+                Manage system administrators and their permissions
+              </p>
+            </div>
+            <div className="flex items-center gap-2 md:gap-3">
+              <Button 
+                onClick={() => navigate('/admins/register')}
+                className="flex items-center gap-2"
+                size="sm"
+              >
+                <UserPlus className="h-4 w-4" />
+                <span className="hidden sm:inline">Add New Admin</span>
+              </Button>
+            </div>
+          </div>
+        </header>
+
+        <div className="p-4 md:p-6 space-y-4 md:space-y-6">
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 animate-fade-in">
+          <Card className="hover:shadow-lg hover:scale-105 transition-all duration-300 animate-scale-in border-0 shadow-sm bg-gradient-to-br from-card to-card/50">
+            <CardContent className="p-3 md:p-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <Users className="h-5 w-5 md:h-6 md:w-6 text-primary" />
+                </div>
+                <div>
+                  <p className="text-lg md:text-2xl font-bold">{admins.length}</p>
+                  <p className="text-xs md:text-sm text-muted-foreground">Total Admins</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="hover:shadow-lg hover:scale-105 transition-all duration-300 animate-scale-in border-0 shadow-sm bg-gradient-to-br from-card to-card/50">
+            <CardContent className="p-3 md:p-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-secondary/10 rounded-lg">
+                  <Shield className="h-5 w-5 md:h-6 md:w-6 text-secondary-foreground" />
+                </div>
+                <div>
+                  <p className="text-lg md:text-2xl font-bold">
+                    {admins.filter(admin => admin.role?.toLowerCase() === 'signature').length}
+                  </p>
+                  <p className="text-xs md:text-sm text-muted-foreground">Signature Admins</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="hover:shadow-lg hover:scale-105 transition-all duration-300 animate-scale-in border-0 shadow-sm bg-gradient-to-br from-card to-card/50 md:col-span-1 col-span-2">
+            <CardContent className="p-3 md:p-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-destructive/10 rounded-lg">
+                  <Shield className="h-5 w-5 md:h-6 md:w-6 text-destructive" />
+                </div>
+                <div>
+                  <p className="text-lg md:text-2xl font-bold">
+                    {admins.filter(admin => admin.role?.toLowerCase() === 'astro').length}
+                  </p>
+                  <p className="text-xs md:text-sm text-muted-foreground">Astro Admins</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Search and Filter */}
+        <Card className="border-0 shadow-sm bg-gradient-to-r from-card to-card/50">
+          <CardContent className="p-3 md:p-4">
+            <div className="flex flex-col md:flex-row gap-3 md:gap-4 items-center">
+              <div className="relative flex-1 w-full">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <input
+                  type="text"
+                  placeholder={isMobile ? "Search admins..." : "Search admins by name or email..."}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                />
+              </div>
+              <div className="flex gap-2 w-full md:w-auto">
+                <select
+                  value={filterRole}
+                  onChange={(e) => setFilterRole(e.target.value)}
+                  className="flex-1 md:flex-none px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                >
+                  <option value="all">All Roles</option>
+                  <option value="admin">Admin</option>
+                  <option value="signature">Signature</option>
+                  <option value="astro">Astro</option>
+                </select>
+                <Button variant="outline" onClick={fetchAdmins} size="sm">
+                  <Filter className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Results Summary */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
+          <p className="text-sm text-muted-foreground">
+            Showing {filteredAdmins.length} of {admins.length} admins
+          </p>
+          <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
+            <Activity className="w-3 h-3 sm:w-4 sm:h-4" />
+            Last updated: just now
+          </div>
+        </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="p-4 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md">
+            {error}
+          </div>
+        )}
+
+        {/* Admins List */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 animate-fade-in">
+          {filteredAdmins.map((admin, index) => (
+            <Card 
+              key={admin.id || admin._id} 
+              className="hover:shadow-xl hover:scale-[1.02] transition-all duration-300 border-0 shadow-md bg-gradient-to-br from-card to-card/50 group"
+              style={{ animationDelay: `${index * 0.1}s` }}
+            >
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                      <Users className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <CardTitle className="text-base md:text-lg group-hover:text-primary transition-colors truncate">
+                        {admin.name || 'No Name'}
+                      </CardTitle>
+                      <CardDescription className="flex items-center gap-1 mt-1">
+                        <Mail className="h-3 w-3 flex-shrink-0" />
+                        <span className="truncate">{admin.email}</span>
+                      </CardDescription>
+                    </div>
+                  </div>
+                  <Badge variant={getRoleBadgeVariant(admin.role)} className="flex-shrink-0">
+                    {admin.role || 'User'}
+                  </Badge>
+                </div>
+              </CardHeader>
+              
+              <CardContent className="pt-0">
+                <div className="space-y-2">
+                  {admin.createdAt && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Calendar className="h-3 w-3" />
+                      Created: {new Date(admin.createdAt).toLocaleDateString()}
+                    </div>
+                  )}
+                  
+                  {admin.lastLogin && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Calendar className="h-3 w-3" />
+                      Last Login: {new Date(admin.lastLogin).toLocaleDateString()}
+                    </div>
+                  )}
+                </div>
+                
+                <div className="flex gap-2 pt-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate(`/admins/update/${admin.id || admin._id}`)}
+                    className="flex-1 group/btn text-sm"
+                  >
+                    <Edit className="h-3 w-3 mr-1" />
+                    <span className="hidden sm:inline">Edit</span>
+                    <span className="sm:hidden">Edit</span>
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => handleDeleteAdmin(admin.id || admin._id)}
+                    className="flex-1 group/btn text-sm"
+                  >
+                    <Trash2 className="h-3 w-3 mr-1" />
+                    <span className="hidden sm:inline">Delete</span>
+                    <span className="sm:hidden">Del</span>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Empty State */}
+        {filteredAdmins.length === 0 && !isLoading && (
+          <div className="text-center py-8 md:py-12 px-4">
+            <Users className="w-10 h-10 md:w-12 md:h-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-base md:text-lg font-medium mb-2">
+              No admins found
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              {searchTerm || filterRole !== 'all' 
+                ? 'Try adjusting your search or filter criteria.'
+                : 'Get started by adding your first admin.'
+              }
+            </p>
+            {(!searchTerm && filterRole === 'all') && (
+              <Button onClick={() => navigate('/admins/register')}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add First Admin
+              </Button>
+            )}
+          </div>
+        )}
+        </div>
+      </main>
+    </div>
+  );
+};
+
+export default Admins;

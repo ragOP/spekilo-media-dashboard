@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
@@ -10,13 +11,17 @@ import {
   ChevronRight,
   BarChart3,
   Menu,
-  X
+  X,
+  LogOut,
+  User,
+  Users
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const Sidebar = ({ collapsed, onToggle }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, logout } = useAuth();
   const [isMobile, setIsMobile] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -41,6 +46,7 @@ const Sidebar = ({ collapsed, onToggle }) => {
     { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/' },
     { id: 'records', label: 'Show Records', icon: FileText, path: '/records' },
     { id: 'abandoned', label: 'Abandoned Records', icon: Archive, path: '/abandoned' },
+    { id: 'admins', label: 'Admin Management', icon: Users, path: '/admins' },
   ];
 
   const getActiveItem = () => {
@@ -153,6 +159,44 @@ const Sidebar = ({ collapsed, onToggle }) => {
             <MenuItem key={item.id} item={item} />
           ))}
         </div>
+      </div>
+
+      {/* User Info and Logout */}
+      <div className="p-3 border-t border-border space-y-2">
+        {user && (
+          <div className={cn(
+            "flex items-center gap-3 p-2 rounded-lg bg-muted/50",
+            collapsed && !isMobile && "justify-center"
+          )}>
+            <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+              <User className="w-4 h-4 text-primary" />
+            </div>
+            {(!collapsed || isMobile) && (
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate">{user.name || user.email}</p>
+                <p className="text-xs text-muted-foreground truncate">{user.role || 'User'}</p>
+              </div>
+            )}
+          </div>
+        )}
+        
+        <Button
+          variant="ghost"
+          className={cn(
+            "w-full justify-start gap-3 h-11 text-destructive hover:text-destructive hover:bg-destructive/10",
+            collapsed && !isMobile ? "px-2" : "px-3"
+          )}
+          onClick={() => {
+            logout();
+            navigate('/login');
+            if (isMobile) setMobileMenuOpen(false);
+          }}
+        >
+          <LogOut className="h-5 w-5 flex-shrink-0" />
+          {(!collapsed || isMobile) && (
+            <span className="flex-1 text-left">Logout</span>
+          )}
+        </Button>
       </div>
     </div>
     </>

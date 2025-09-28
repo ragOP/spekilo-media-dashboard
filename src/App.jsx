@@ -1,24 +1,69 @@
 import React from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { AuthProvider } from './contexts/AuthContext'
+import ProtectedRoute from './components/ProtectedRoute'
 import Dashboard from './pages/dashboard';
 import Records from './pages/records';
 import Abandoned from './pages/abandoned';
 import DetailPage from './pages/detail-page';
 import RecordsDetail from './pages/records/detail';
+import Login from './pages/login';
+import Admins from './pages/admins';
+import AdminRegister from './pages/admins/register';
+import AdminUpdate from './pages/admins/update';
 
 const App = () => {
   return (
-    <div className="min-h-screen safe-area-inset">
-      <Router>
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/records" element={<Records />} />
-          <Route path="/records/:id" element={<RecordsDetail />} />
-          <Route path="/abandoned" element={<Abandoned />} />
-          <Route path="/abandoned/:id" element={<DetailPage />} />
-        </Routes>
-      </Router>
-    </div>
+    <AuthProvider>
+      <div className="min-h-screen safe-area-inset">
+        <Router>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/" element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/records" element={
+              <ProtectedRoute>
+                <Records />
+              </ProtectedRoute>
+            } />
+            <Route path="/records/:id" element={
+              <ProtectedRoute>
+                <RecordsDetail />
+              </ProtectedRoute>
+            } />
+            <Route path="/abandoned" element={
+              <ProtectedRoute>
+                <Abandoned />
+              </ProtectedRoute>
+            } />
+            <Route path="/abandoned/:id" element={
+              <ProtectedRoute>
+                <DetailPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/admins" element={
+              <ProtectedRoute>
+                <Admins />
+              </ProtectedRoute>
+            } />
+            <Route path="/admins/register" element={
+              <ProtectedRoute>
+                <AdminRegister />
+              </ProtectedRoute>
+            } />
+            <Route path="/admins/update/:id" element={
+              <ProtectedRoute>
+                <AdminUpdate />
+              </ProtectedRoute>
+            } />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Router>
+      </div>
+    </AuthProvider>
   )
 }
 

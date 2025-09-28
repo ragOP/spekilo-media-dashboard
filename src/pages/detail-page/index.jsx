@@ -36,7 +36,7 @@ const DetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [dateFilter, setDateFilter] = useState("all");
+  const [dateFilter, setDateFilter] = useState("today");
   const [customDateRange, setCustomDateRange] = useState({
     start: "",
     end: "",
@@ -51,10 +51,10 @@ const DetailPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [, setTotalCount] = useState(0);
-  const [itemsPerPage] = useState(1000);
+  const [itemsPerPage] = useState(100000000);
 
   const fetchOrders = useCallback(
-    async (page = 1, limit = 1000) => {
+    async (page = 1, limit = 10) => {
       try {
         setLoading(true);
         setError(null);
@@ -209,11 +209,7 @@ const DetailPage = () => {
       const lastWeek = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
 
       switch (dateFilter) {
-        case "today":
-          filtered = filtered.filter((order) => {
-            const orderDate = new Date(order.orderDate);
-            return orderDate >= today;
-          });
+        case "all":
           break;
         case "yesterday":
           filtered = filtered.filter((order) => {
@@ -237,6 +233,12 @@ const DetailPage = () => {
             });
           }
           break;
+        default:
+          filtered = filtered.filter((order) => {
+            const orderDate = new Date(order.orderDate);
+            return orderDate >= today;
+          });
+        break;
       }
     }
 
@@ -602,11 +604,11 @@ const DetailPage = () => {
                     onChange={(e) => setDateFilter(e.target.value)}
                     className="px-3 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 flex-shrink-0"
                   >
-                    <option value="all">All</option>
                     <option value="today">Today</option>
                     <option value="yesterday">Yesterday</option>
                     <option value="last7days">Last 7 Days</option>
                     <option value="custom">Custom Range</option>
+                    <option value="all">All</option>
                   </select>
 
                   {dateFilter === "custom" && (
