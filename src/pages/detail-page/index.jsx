@@ -105,7 +105,8 @@ const DetailPage = () => {
             orderDate: order.orderDate,
             dob: order.dob || "N/A",
             gender: order.gender || "N/A",
-            placeOfBirth: order.placeOfBirth || order.remarks || "N/A",
+            placeOfBirth: order.placeOfBirth || "N/A",
+            remarks: order.remarks || "N/A",
           }));
 
           setOrderData(transformedData);
@@ -254,7 +255,8 @@ const DetailPage = () => {
           order.dob.toLowerCase().includes(searchQuery.toLowerCase()) ||
           order.placeOfBirth.toLowerCase().includes(searchQuery.toLowerCase()) ||
           (order.profession && order.profession.toLowerCase().includes(searchQuery.toLowerCase())) ||
-          order.additionalProducts.toLowerCase().includes(searchQuery.toLowerCase())
+          order.additionalProducts.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          order.remarks.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
@@ -288,6 +290,7 @@ const DetailPage = () => {
       "Place of Birth",
       "Profession",
       "Additional Products",
+      "Remarks",
       "Amount",
       "Order Date",
     ];
@@ -304,6 +307,7 @@ const DetailPage = () => {
           `"${order.placeOfBirth || "N/A"}"`,
           `"${order.profession || "N/A"}"`,
           `"${order.additionalProducts}"`,
+          `"${order.remarks || "N/A"}"`,
           order.amount,
           new Date(order.orderDate).toLocaleDateString(),
         ].join(",")
@@ -717,24 +721,25 @@ const DetailPage = () => {
                     {/* Desktop Table View */}
                     <div className="hidden md:block overflow-x-auto max-w-full">
                       <div className="min-w-full overflow-x-auto">
-                        <table className="w-full min-w-max">
+                        <table className="w-full table-auto">
                         <thead className="sticky top-0 bg-background z-10">
                           <tr className="border-b border-border">
-                            <th className="text-left p-3 font-medium min-w-[120px]">
+                            <th className="text-left p-3 font-medium whitespace-nowrap">
                               Order ID
                             </th>
-                            <th className="text-left p-3 font-medium min-w-[150px]">Name</th>
-                            <th className="text-left p-3 font-medium min-w-[200px]">Email</th>
-                            <th className="text-left p-3 font-medium min-w-[120px]">Phone</th>
-                            <th className="text-left p-3 font-medium min-w-[80px]">Gender</th>
-                            <th className="text-left p-3 font-medium min-w-[140px]">DOB</th>
-                            <th className="text-left p-3 font-medium min-w-[150px]">Place of Birth</th>
-                            <th className="text-left p-3 font-medium min-w-[120px]">Profession</th>
-                            <th className="text-left p-3 font-medium min-w-[180px]">Additional Products</th>
-                            <th className="text-left p-3 font-medium min-w-[100px]">
+                            <th className="text-left p-3 font-medium whitespace-nowrap">Name</th>
+                            <th className="text-left p-3 font-medium whitespace-nowrap">Email</th>
+                            <th className="text-left p-3 font-medium whitespace-nowrap">Phone</th>
+                            <th className="text-left p-3 font-medium whitespace-nowrap">Gender</th>
+                            <th className="text-left p-3 font-medium whitespace-nowrap">DOB</th>
+                            <th className="text-left p-3 font-medium whitespace-nowrap">Place of Birth</th>
+                            <th className="text-left p-3 font-medium whitespace-nowrap">Profession</th>
+                            <th className="text-left p-3 font-medium whitespace-nowrap">Additional Products</th>
+                            <th className="text-left p-3 font-medium whitespace-nowrap">Remarks</th>
+                            <th className="text-left p-3 font-medium whitespace-nowrap">
                               Amount
                             </th>
-                            <th className="text-left p-3 font-medium min-w-[140px]">
+                            <th className="text-left p-3 font-medium whitespace-nowrap">
                               Order Date
                             </th>
                           </tr>
@@ -746,62 +751,75 @@ const DetailPage = () => {
                               className="border-b border-border/50 hover:bg-muted/50"
                             >
                               <td className="p-3">
-                                <span className="font-mono text-sm text-blue-600">
+                                <span className="font-mono text-sm text-blue-600 whitespace-nowrap">
                                   {order.orderId}
                                 </span>
                               </td>
                               <td className="p-3">
                                 <div className="flex items-center gap-2">
-                                  <User className="w-4 h-4 text-muted-foreground" />
-                                  <span className="font-medium">
+                                  <User className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                                  <span className="font-medium whitespace-nowrap">
                                     {order.name}
                                   </span>
                                 </div>
                               </td>
                               <td className="p-3">
                                 <div className="flex items-center gap-2">
-                                  <Mail className="w-4 h-4 text-muted-foreground" />
-                                  <span className="text-sm">{order.email}</span>
+                                  <Mail className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                                  <span className="text-sm whitespace-nowrap">{order.email}</span>
                                 </div>
                               </td>
                               <td className="p-3">
                                 <div className="flex items-center gap-2">
-                                  <Phone className="w-4 h-4 text-muted-foreground" />
-                                  <span className="text-sm">{order.phone}</span>
+                                  <Phone className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                                  <span className="text-sm whitespace-nowrap">{order.phone}</span>
                                 </div>
                               </td>
                               <td className="p-3">
-                                <span className="text-sm text-muted-foreground">
+                                <span className="text-sm text-muted-foreground whitespace-nowrap">
                                   {order.gender}
                                 </span>
                               </td>
                               <td className="p-3">
-                                <span className="text-sm text-muted-foreground">
+                                <span className="text-sm text-muted-foreground whitespace-nowrap">
                                   {formatDOB(order.dob)}
                                 </span>
                               </td>
                               <td className="p-3">
-                                <span className="text-sm text-muted-foreground">
+                                <span className="text-sm text-muted-foreground whitespace-nowrap">
                                   {order.placeOfBirth}
                                 </span>
                               </td>
                               <td className="p-3">
-                                <span className="text-sm text-muted-foreground">
+                                <span className="text-sm text-muted-foreground whitespace-nowrap">
                                   {order.profession || "N/A"}
                                 </span>
                               </td>
                               <td className="p-3">
-                                <span className="text-sm text-muted-foreground">
-                                  {order.additionalProducts}
+                                {order.additionalProducts && order.additionalProducts !== "N/A" ? (
+                                  <div className="flex flex-wrap gap-1">
+                                    {order.additionalProducts.split(',').map((product, index) => (
+                                      <Badge key={index} variant="secondary" className="text-xs">
+                                        {product.trim()}
+                                      </Badge>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <span className="text-sm text-muted-foreground">N/A</span>
+                                )}
+                              </td>
+                              <td className="p-3">
+                                <span className="text-sm text-muted-foreground whitespace-nowrap" title={order.remarks || 'N/A'}>
+                                  {order.remarks}
                                 </span>
                               </td>
                               <td className="p-3">
-                                <span className="font-bold text-green-600">
+                                <span className="font-bold text-green-600 whitespace-nowrap">
                                   {order.amount}
                                 </span>
                               </td>
                               <td className="p-3">
-                                <span className="text-sm text-muted-foreground">
+                                <span className="text-sm text-muted-foreground whitespace-nowrap">
                                   {formatDate(order.orderDate)}
                                 </span>
                               </td>
@@ -888,14 +906,31 @@ const DetailPage = () => {
                               </div>
                             )}
 
-                            <div className="space-y-1">
-                              <p className="text-xs text-muted-foreground font-medium">
-                                Additional Products:
-                              </p>
-                              <p className="text-sm text-muted-foreground">
-                                {order.additionalProducts}
-                              </p>
-                            </div>
+                            {order.additionalProducts && order.additionalProducts !== "N/A" && (
+                              <div className="space-y-1">
+                                <p className="text-xs text-muted-foreground font-medium">
+                                  Additional Products:
+                                </p>
+                                <div className="flex flex-wrap gap-1">
+                                  {order.additionalProducts.split(',').map((product, index) => (
+                                    <Badge key={index} variant="secondary" className="text-xs">
+                                      {product.trim()}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {order.remarks && order.remarks !== "N/A" && (
+                              <div className="space-y-1">
+                                <p className="text-xs text-muted-foreground font-medium">
+                                  Remarks:
+                                </p>
+                                <p className="text-sm text-muted-foreground">
+                                  {order.remarks}
+                                </p>
+                              </div>
+                            )}
 
                             <div className="flex items-center gap-2 pt-1">
                               <Clock className="w-4 h-4 text-muted-foreground flex-shrink-0" />
@@ -1010,7 +1045,7 @@ const DetailPage = () => {
             /* Chart View */
             <Card className="border-0 shadow-sm">
               <CardHeader>
-                <CardTitle>Revenue Chart</CardTitle>
+                <CardTitle>Revenue Trend</CardTitle>
                 <CardDescription>
                   {loading ? (
                     <div className="flex items-center gap-2">
@@ -1018,12 +1053,12 @@ const DetailPage = () => {
                       Loading chart data...
                     </div>
                   ) : (
-                    "Daily revenue overview"
+                    "Daily revenue trend with interactive data points"
                   )}
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-64 md:h-96 flex items-end justify-center gap-1 md:gap-2 p-2 md:p-4 overflow-x-auto">
+                <div className="h-80 md:h-[28rem] p-2 md:p-4 overflow-x-auto">
                   {loading ? (
                     <div className="text-center">
                       <Loader2 className="w-10 h-10 md:w-12 md:h-12 animate-spin text-muted-foreground mx-auto mb-4" />
@@ -1032,51 +1067,165 @@ const DetailPage = () => {
                       </p>
                     </div>
                   ) : chartData.length > 0 ? (
-                    chartData.map((day) => {
-                      const maxValue = Math.max(
-                        ...chartData.map((d) => parseFloat(d.total))
-                      );
-                      const mobileHeight =
-                        (parseFloat(day.total) / maxValue) * 200; // Shorter on mobile
-                      const desktopHeight =
-                        (parseFloat(day.total) / maxValue) * 300;
+                    <div className="relative w-full h-full">
+                      {/* Line Chart SVG */}
+                      <svg
+                        className="w-full h-full"
+                        viewBox="0 0 800 350"
+                        preserveAspectRatio="xMidYMid meet"
+                      >
+                        {/* Grid lines */}
+                        <defs>
+                          <pattern id="grid" width="40" height="30" patternUnits="userSpaceOnUse">
+                            <path d="M 40 0 L 0 0 0 30" fill="none" stroke="#e5e7eb" strokeWidth="0.5" opacity="0.3"/>
+                          </pattern>
+                          <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stopColor="#10b981" stopOpacity="0.3"/>
+                            <stop offset="100%" stopColor="#10b981" stopOpacity="0.05"/>
+                          </linearGradient>
+                        </defs>
+                        
+                        <rect width="100%" height="100%" fill="url(#grid)" />
+                        
+                        {/* Calculate chart dimensions and scaling */}
+                        {(() => {
+                          const maxValue = Math.max(...chartData.map((d) => parseFloat(d.total)));
+                          const minValue = Math.min(...chartData.map((d) => parseFloat(d.total)));
+                          const valueRange = maxValue - minValue || 1;
+                          const padding = 40;
+                          const chartWidth = 800 - (padding * 2);
+                          const chartHeight = 280 - (padding * 2);
+                          const stepX = chartWidth / (chartData.length - 1);
+                          
+                          // Generate path for line
+                          const points = chartData.map((day, index) => {
+                            const x = padding + (index * stepX);
+                            const y = padding + chartHeight - ((parseFloat(day.total) - minValue) / valueRange) * chartHeight;
+                            return `${x},${y}`;
+                          });
+                          
+                          const linePath = `M ${points.join(' L ')}`;
+                          const areaPath = `${linePath} L ${padding + chartWidth},${padding + chartHeight} L ${padding},${padding + chartHeight} Z`;
 
                       return (
-                        <div
-                          key={day.date}
-                          className="flex flex-col items-center gap-1 md:gap-2 flex-shrink-0"
-                        >
-                          <div className="text-xs font-medium text-green-600 whitespace-nowrap">
-                            ₹
-                            {isMobile && day.total.length > 6
-                              ? parseFloat(day.total).toFixed(0)
-                              : day.total}
-                          </div>
-                          <div
-                            className="bg-gradient-to-t from-green-500 to-green-400 rounded-t-md transition-all duration-500 hover:from-green-600 hover:to-green-500"
+                            <>
+                              {/* Area under the line */}
+                              <path
+                                d={areaPath}
+                                fill="url(#areaGradient)"
+                                className="transition-all duration-500"
+                              />
+                              
+                              {/* Line */}
+                              <path
+                                d={linePath}
+                                fill="none"
+                                stroke="#10b981"
+                                strokeWidth="3"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="transition-all duration-500"
+                              />
+                              
+                              {/* Data points */}
+                              {chartData.map((day, index) => {
+                                const x = padding + (index * stepX);
+                                const y = padding + chartHeight - ((parseFloat(day.total) - minValue) / valueRange) * chartHeight;
+                                
+                                return (
+                                  <g key={day.date}>
+                                    {/* Hover circle */}
+                                    <circle
+                                      cx={x}
+                                      cy={y}
+                                      r="6"
+                                      fill="#10b981"
+                                      className="opacity-0 hover:opacity-100 transition-opacity duration-200 cursor-pointer"
+                                    />
+                                    {/* Main circle */}
+                                    <circle
+                                      cx={x}
+                                      cy={y}
+                                      r="4"
+                                      fill="#10b981"
+                                      stroke="#ffffff"
+                                      strokeWidth="2"
+                                      className="transition-all duration-200 hover:r-6"
+                                    />
+                                    
+                                    {/* Value label on hover */}
+                                    <text
+                                      x={x}
+                                      y={y - 15}
+                                      textAnchor="middle"
+                                      className="text-xs font-medium fill-green-600 opacity-0 hover:opacity-100 transition-opacity duration-200"
+                                      fontSize="12"
+                                    >
+                                      ₹{parseFloat(day.total).toFixed(0)}
+                                    </text>
+                                    
+                                    {/* Date label - only show every few labels to prevent overlap */}
+                                    {index % Math.max(1, Math.floor(chartData.length / 8)) === 0 && (
+                                      <text
+                                        x={x}
+                                        y={padding + chartHeight + 25}
+                                        textAnchor="middle"
+                                        className="text-xs fill-gray-500"
+                                        fontSize="10"
                             style={{
-                              height: `${Math.max(
-                                isMobile ? mobileHeight : desktopHeight,
-                                20
-                              )}px`,
-                              minWidth: isMobile ? "24px" : "40px",
-                              width: isMobile ? "24px" : "40px",
-                            }}
-                          ></div>
-                          <div className="text-xs text-muted-foreground transform -rotate-45 origin-bottom-left whitespace-nowrap">
-                            {isMobile
-                              ? new Date(day.date).toLocaleDateString("en-US", {
-                                  month: "numeric",
-                                  day: "numeric",
-                                })
-                              : new Date(day.date).toLocaleDateString("en-US", {
+                                          transform: 'rotate(-45deg)',
+                                          transformOrigin: `${x}px ${padding + chartHeight + 25}px`
+                                        }}
+                                      >
+                                        {new Date(day.date).toLocaleDateString("en-US", {
                                   month: "short",
                                   day: "numeric",
                                 })}
+                                      </text>
+                                    )}
+                                  </g>
+                                );
+                              })}
+                              
+                              {/* Y-axis labels */}
+                              {[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
+                                const value = minValue + (valueRange * ratio);
+                                const y = padding + chartHeight - (ratio * chartHeight);
+                                
+                                return (
+                                  <g key={ratio}>
+                                    <line
+                                      x1={padding - 5}
+                                      y1={y}
+                                      x2={padding}
+                                      y2={y}
+                                      stroke="#d1d5db"
+                                      strokeWidth="1"
+                                    />
+                                    <text
+                                      x={padding - 10}
+                                      y={y + 4}
+                                      textAnchor="end"
+                                      className="text-xs fill-gray-500"
+                                      fontSize="10"
+                                    >
+                                      ₹{value.toFixed(0)}
+                                    </text>
+                                  </g>
+                                );
+                              })}
+                            </>
+                          );
+                        })()}
+                      </svg>
+                      
+                      {/* Chart summary */}
+                      <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-sm border">
+                        <div className="text-sm font-medium text-gray-700">Total Revenue</div>
+                        <div className="text-lg font-bold text-green-600">₹{getTotalAmount()}</div>
+                        <div className="text-xs text-gray-500">{chartData.length} days</div>
                           </div>
                         </div>
-                      );
-                    })
                   ) : (
                     <div className="text-center">
                       <BarChart3 className="w-10 h-10 md:w-12 md:h-12 text-muted-foreground mx-auto mb-4" />

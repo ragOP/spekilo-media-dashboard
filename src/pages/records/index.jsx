@@ -74,7 +74,7 @@ const Records = () => {
       route: "lander2",
       allowedRoles: ["admin", "astro"], // Astra Soul records - admin and astro only
     },
-    {
+        {
       id: "#REC-054",
       website: "Soul Mate Sketch",
       domain: "https://www.easyastro.in/soulmatesketch",
