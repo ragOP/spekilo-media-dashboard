@@ -118,14 +118,16 @@ const DetailPage = () => {
         name: order.fullName || order.name || order.customerName || 'N/A',
         email: order.email || order.customerEmail || 'N/A',
         phone: order.phoneNumber || order.phone || order.customerPhone || 'N/A',
+        profession: order.profession || null,
         additionalProducts: Array.isArray(order.additionalProducts) 
-          ? (order.additionalProducts.length > 0 ? order.additionalProducts.join(', ') : order.profession || 'Basic Plan')
-          : (order.additionalProducts || order.profession || order.products || order.items || 'Basic Plan'),
+          ? (order.additionalProducts.length > 0 ? order.additionalProducts.join(', ') : null)
+          : (order.additionalProducts || null),
+        products: order.products || order.items || null,
         amount: order.amount ? `₹${parseFloat(order.amount).toFixed(2)}` : '₹0.00',
         orderDate: order.orderDate || order.createdAt || new Date().toISOString(),
-        dob: order.dob || 'N/A',
-        gender: order.gender || 'N/A',
-        placeOfBirth: order.placeOfBirth || order.remarks || 'N/A',
+        dob: order.dob || null,
+        gender: order.gender || null,
+        placeOfBirth: order.placeOfBirth || order.remarks || null,
         razorpayPaymentId: order.razorpayPaymentId
       }));
       
@@ -220,7 +222,10 @@ const DetailPage = () => {
         order.orderId.toLowerCase().includes(searchQuery.toLowerCase()) ||
         order.phone.includes(searchQuery) ||
         (order.placeOfBirth && order.placeOfBirth.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        order.additionalProducts.toLowerCase().includes(searchQuery.toLowerCase())
+        (order.profession && order.profession.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (order.additionalProducts && order.additionalProducts.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (order.products && order.products.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (order.gender && order.gender.toLowerCase().includes(searchQuery.toLowerCase()))
       );
     }
 
@@ -245,7 +250,7 @@ const DetailPage = () => {
   }, [filteredData]);
 
   const exportToCSV = () => {
-    const headers = ['Order ID', 'Name', 'Email', 'Phone', 'Place of Birth/Remarks', 'Gender', 'Products/Profession', 'Amount', 'Order Date'];
+    const headers = ['Order ID', 'Name', 'Email', 'Phone', 'Date of Birth', 'Gender', 'Place of Birth', 'Profession', 'Additional Products', 'Products', 'Amount', 'Order Date'];
     const csvContent = [
       headers.join(','),
       ...filteredData.map(order => [
@@ -253,9 +258,12 @@ const DetailPage = () => {
         `"${order.name}"`,
         order.email,
         order.phone,
+        `"${order.dob || 'N/A'}"`,
+        `"${order.gender || 'N/A'}"`,
         `"${order.placeOfBirth || 'N/A'}"`,
-        order.gender || 'N/A',
-        `"${order.additionalProducts}"`,
+        `"${order.profession || 'N/A'}"`,
+        `"${order.additionalProducts || 'N/A'}"`,
+        `"${order.products || 'N/A'}"`,
         order.amount,
         new Date(order.orderDate).toLocaleDateString()
       ].join(','))
@@ -272,7 +280,7 @@ const DetailPage = () => {
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
+      year: '2-digit',
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
@@ -492,7 +500,7 @@ const DetailPage = () => {
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                   <input
                     type="text"
-                    placeholder={isMobile ? "Search orders..." : "Search by name, email, order ID, place, or products..."}
+                    placeholder={isMobile ? "Search orders..." : "Search by name, email, order ID, place, profession, products, or gender..."}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
@@ -555,59 +563,74 @@ const DetailPage = () => {
               <CardContent>
                 {/* Desktop Table View */}
                 <div className="hidden md:block overflow-x-auto">
-                  <table className="w-full">
+                  <div className="min-w-full">
+                    <table className="w-full min-w-[1250px] table-fixed">
                     <thead>
                       <tr className="border-b border-border">
-                        <th className="text-left p-3 font-medium">Order ID</th>
-                        <th className="text-left p-3 font-medium">Name</th>
-                        <th className="text-left p-3 font-medium">Email</th>
-                        <th className="text-left p-3 font-medium">Phone</th>
-                        <th className="text-left p-3 font-medium">Place of Birth/Remarks</th>
-                        <th className="text-left p-3 font-medium">Products/Profession</th>
-                        <th className="text-left p-3 font-medium">Amount</th>
-                        <th className="text-left p-3 font-medium">Order Date</th>
+                        <th className="text-left p-3 font-medium w-32">Order ID</th>
+                        <th className="text-left p-3 font-medium w-40">Name</th>
+                        <th className="text-left p-3 font-medium w-48">Email</th>
+                        <th className="text-left p-3 font-medium w-32">Phone</th>
+                        <th className="text-left p-3 font-medium w-28">DOB</th>
+                        <th className="text-left p-3 font-medium w-20">Gender</th>
+                        <th className="text-left p-3 font-medium w-36">Place of Birth</th>
+                        <th className="text-left p-3 font-medium w-32">Profession</th>
+                        <th className="text-left p-3 font-medium w-48">Additional Products</th>
+                        <th className="text-left p-3 font-medium w-40">Products</th>
+                        <th className="text-left p-3 font-medium w-24">Amount</th>
+                        <th className="text-left p-3 font-medium w-44">Order Date</th>
                       </tr>
                     </thead>
                     <tbody>
                       {filteredData.map((order) => (
                         <tr key={order.orderId} className="border-b border-border/50 hover:bg-muted/50">
                           <td className="p-3">
-                            <span className="font-mono text-sm text-blue-600">{order.orderId}</span>
+                            <span className="font-mono text-sm text-blue-600 truncate block">{order.orderId}</span>
                           </td>
                           <td className="p-3">
-                            <div className="flex items-center gap-2">
-                              <User className="w-4 h-4 text-muted-foreground" />
-                              <span className="font-medium">{order.name}</span>
+                            <div className="flex items-center gap-2 min-w-0">
+                              <User className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                              <span className="font-medium truncate">{order.name}</span>
                             </div>
                           </td>
                           <td className="p-3">
-                            <div className="flex items-center gap-2">
-                              <Mail className="w-4 h-4 text-muted-foreground" />
-                              <span className="text-sm">{order.email}</span>
+                            <div className="flex items-center gap-2 min-w-0">
+                              <Mail className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                              <span className="text-sm truncate">{order.email}</span>
                             </div>
                           </td>
                           <td className="p-3">
-                            <div className="flex items-center gap-2">
-                              <Phone className="w-4 h-4 text-muted-foreground" />
-                              <span className="text-sm">{order.phone}</span>
-                            </div>
+                            <span className="text-sm truncate block">{order.phone}</span>
                           </td>
                           <td className="p-3">
-                            <span className="text-sm text-muted-foreground">{order.placeOfBirth || 'N/A'}</span>
+                            <span className="text-sm text-muted-foreground truncate block">{order.dob || 'N/A'}</span>
                           </td>
                           <td className="p-3">
-                            <span className="text-sm text-muted-foreground">{order.additionalProducts}</span>
+                            <span className="text-sm text-muted-foreground truncate block">{order.gender || 'N/A'}</span>
                           </td>
                           <td className="p-3">
-                            <span className="font-bold text-green-600">{order.amount}</span>
+                            <span className="text-sm text-muted-foreground truncate block" title={order.placeOfBirth || 'N/A'}>{order.placeOfBirth || 'N/A'}</span>
                           </td>
                           <td className="p-3">
-                            <span className="text-sm text-muted-foreground">{formatDate(order.orderDate)}</span>
+                            <span className="text-sm text-muted-foreground truncate block" title={order.profession || 'N/A'}>{order.profession || 'N/A'}</span>
+                          </td>
+                          <td className="p-3">
+                            <span className="text-sm text-muted-foreground truncate block" title={order.additionalProducts || 'N/A'}>{order.additionalProducts || 'N/A'}</span>
+                          </td>
+                          <td className="p-3">
+                            <span className="text-sm text-muted-foreground truncate block" title={order.products || 'N/A'}>{order.products || 'N/A'}</span>
+                          </td>
+                          <td className="p-3">
+                            <span className="font-bold text-green-600 truncate block">{order.amount}</span>
+                          </td>
+                          <td className="p-3">
+                            <span className="text-sm text-muted-foreground truncate block">{formatDate(order.orderDate)}</span>
                           </td>
                         </tr>
                       ))}
                     </tbody>
-                  </table>
+                    </table>
+                  </div>
                 </div>
                 
                 {/* Loading State for Desktop */}
@@ -643,17 +666,47 @@ const DetailPage = () => {
                           <span className="text-sm text-muted-foreground">{order.phone}</span>
                         </div>
                         
-                        {order.placeOfBirth && (
+                        {order.dob && (
                           <div className="flex items-center gap-2">
-                            <Package className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                            <span className="text-sm text-muted-foreground">{order.placeOfBirth}</span>
+                            <Calendar className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                            <span className="text-sm text-muted-foreground">DOB: {order.dob}</span>
                           </div>
                         )}
                         
-                        <div className="space-y-1">
-                          <p className="text-xs text-muted-foreground font-medium">Products:</p>
-                          <p className="text-sm text-muted-foreground">{order.additionalProducts}</p>
-                        </div>
+                        {order.gender && (
+                          <div className="flex items-center gap-2">
+                            <User className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                            <span className="text-sm text-muted-foreground">Gender: {order.gender}</span>
+                          </div>
+                        )}
+                        
+                        {order.placeOfBirth && (
+                          <div className="flex items-center gap-2">
+                            <Package className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                            <span className="text-sm text-muted-foreground">Place: {order.placeOfBirth}</span>
+                          </div>
+                        )}
+                        
+                        {order.profession && (
+                          <div className="space-y-1">
+                            <p className="text-xs text-muted-foreground font-medium">Profession:</p>
+                            <p className="text-sm text-muted-foreground">{order.profession}</p>
+                          </div>
+                        )}
+                        
+                        {order.additionalProducts && (
+                          <div className="space-y-1">
+                            <p className="text-xs text-muted-foreground font-medium">Additional Products:</p>
+                            <p className="text-sm text-muted-foreground">{order.additionalProducts}</p>
+                          </div>
+                        )}
+                        
+                        {order.products && (
+                          <div className="space-y-1">
+                            <p className="text-xs text-muted-foreground font-medium">Products:</p>
+                            <p className="text-sm text-muted-foreground">{order.products}</p>
+                          </div>
+                        )}
                         
                         <div className="flex items-center gap-2 pt-1">
                           <Clock className="w-4 h-4 text-muted-foreground flex-shrink-0" />

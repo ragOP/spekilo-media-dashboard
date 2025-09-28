@@ -96,10 +96,11 @@ const DetailPage = () => {
             name: order.fullName || "N/A",
             email: order.email || "N/A",
             phone: order.phoneNumber || "N/A",
+            profession: order.profession || "N/A",
             additionalProducts:
               order.additionalProducts && order.additionalProducts.length > 0
                 ? order.additionalProducts.join(", ")
-                : order.profession || "Basic Plan",
+                : "N/A",
             amount: `₹${order.amount}`,
             orderDate: order.orderDate,
             dob: order.dob || "N/A",
@@ -249,8 +250,11 @@ const DetailPage = () => {
           order.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
           order.orderId.toLowerCase().includes(searchQuery.toLowerCase()) ||
           order.phone.includes(searchQuery) ||
-          order.additionalProducts.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          order.placeOfBirth.toLowerCase().includes(searchQuery.toLowerCase())
+          order.gender.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          order.dob.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          order.placeOfBirth.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (order.profession && order.profession.toLowerCase().includes(searchQuery.toLowerCase())) ||
+          order.additionalProducts.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
@@ -279,11 +283,13 @@ const DetailPage = () => {
       "Name",
       "Email",
       "Phone",
-      "Additional Products/Profession",
+      "Gender",
+      "DOB",
+      "Place of Birth",
+      "Profession",
+      "Additional Products",
       "Amount",
       "Order Date",
-      "Place of Birth/Remarks",
-      "Gender",
     ];
     const csvContent = [
       headers.join(","),
@@ -293,11 +299,13 @@ const DetailPage = () => {
           `"${order.name}"`,
           order.email,
           order.phone,
+          order.gender || "N/A",
+          formatDOB(order.dob),
+          `"${order.placeOfBirth || "N/A"}"`,
+          `"${order.profession || "N/A"}"`,
           `"${order.additionalProducts}"`,
           order.amount,
           new Date(order.orderDate).toLocaleDateString(),
-          `"${order.placeOfBirth || "N/A"}"`,
-          order.gender || "N/A",
         ].join(",")
       ),
     ].join("\n");
@@ -321,6 +329,19 @@ const DetailPage = () => {
       hour: "2-digit",
       minute: "2-digit",
     });
+  };
+
+  const formatDOB = (dobString) => {
+    if (!dobString || dobString === "N/A") return "N/A";
+    try {
+      return new Date(dobString).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+    } catch {
+      return dobString; // Return original if parsing fails
+    }
   };
 
   const getTotalAmount = () => {
@@ -590,7 +611,7 @@ const DetailPage = () => {
                     placeholder={
                       isMobile
                         ? "Search orders..."
-                        : "Search by name, email, order ID, place, or products..."
+                        : "Search by name, email, order ID, gender, DOB, place, profession, or products..."
                     }
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -694,23 +715,26 @@ const DetailPage = () => {
                 ) : (
                   <>
                     {/* Desktop Table View */}
-                    <div className="hidden md:block overflow-x-auto">
-                      <table className="w-full">
-                        <thead>
+                    <div className="hidden md:block overflow-x-auto max-w-full">
+                      <div className="min-w-full overflow-x-auto">
+                        <table className="w-full min-w-max">
+                        <thead className="sticky top-0 bg-background z-10">
                           <tr className="border-b border-border">
-                            <th className="text-left p-3 font-medium">
+                            <th className="text-left p-3 font-medium min-w-[120px]">
                               Order ID
                             </th>
-                            <th className="text-left p-3 font-medium">Name</th>
-                            <th className="text-left p-3 font-medium">Email</th>
-                            <th className="text-left p-3 font-medium">Phone</th>
-                            <th className="text-left p-3 font-medium">
-                              Products/Profession
-                            </th>
-                            <th className="text-left p-3 font-medium">
+                            <th className="text-left p-3 font-medium min-w-[150px]">Name</th>
+                            <th className="text-left p-3 font-medium min-w-[200px]">Email</th>
+                            <th className="text-left p-3 font-medium min-w-[120px]">Phone</th>
+                            <th className="text-left p-3 font-medium min-w-[80px]">Gender</th>
+                            <th className="text-left p-3 font-medium min-w-[140px]">DOB</th>
+                            <th className="text-left p-3 font-medium min-w-[150px]">Place of Birth</th>
+                            <th className="text-left p-3 font-medium min-w-[120px]">Profession</th>
+                            <th className="text-left p-3 font-medium min-w-[180px]">Additional Products</th>
+                            <th className="text-left p-3 font-medium min-w-[100px]">
                               Amount
                             </th>
-                            <th className="text-left p-3 font-medium">
+                            <th className="text-left p-3 font-medium min-w-[140px]">
                               Order Date
                             </th>
                           </tr>
@@ -748,6 +772,26 @@ const DetailPage = () => {
                               </td>
                               <td className="p-3">
                                 <span className="text-sm text-muted-foreground">
+                                  {order.gender}
+                                </span>
+                              </td>
+                              <td className="p-3">
+                                <span className="text-sm text-muted-foreground">
+                                  {formatDOB(order.dob)}
+                                </span>
+                              </td>
+                              <td className="p-3">
+                                <span className="text-sm text-muted-foreground">
+                                  {order.placeOfBirth}
+                                </span>
+                              </td>
+                              <td className="p-3">
+                                <span className="text-sm text-muted-foreground">
+                                  {order.profession || "N/A"}
+                                </span>
+                              </td>
+                              <td className="p-3">
+                                <span className="text-sm text-muted-foreground">
                                   {order.additionalProducts}
                                 </span>
                               </td>
@@ -764,7 +808,8 @@ const DetailPage = () => {
                             </tr>
                           ))}
                         </tbody>
-                      </table>
+                        </table>
+                      </div>
                     </div>
 
                     {/* Mobile Card View */}
@@ -805,9 +850,47 @@ const DetailPage = () => {
                               </span>
                             </div>
 
+                            {order.gender && order.gender !== "N/A" && (
+                              <div className="flex items-center gap-2">
+                                <User className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                                <span className="text-sm text-muted-foreground">
+                                  Gender: {order.gender}
+                                </span>
+                              </div>
+                            )}
+
+                            {order.dob && order.dob !== "N/A" && (
+                              <div className="flex items-center gap-2">
+                                <Calendar className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                                <span className="text-sm text-muted-foreground">
+                                  DOB: {formatDOB(order.dob)}
+                                </span>
+                              </div>
+                            )}
+
+                            {order.placeOfBirth && order.placeOfBirth !== "N/A" && (
+                              <div className="flex items-center gap-2">
+                                <Package className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                                <span className="text-sm text-muted-foreground">
+                                  Place of Birth: {order.placeOfBirth}
+                                </span>
+                              </div>
+                            )}
+
+                            {order.profession && order.profession !== "N/A" && (
+                              <div className="space-y-1">
+                                <p className="text-xs text-muted-foreground font-medium">
+                                  Profession:
+                                </p>
+                                <p className="text-sm text-muted-foreground">
+                                  {order.profession}
+                                </p>
+                              </div>
+                            )}
+
                             <div className="space-y-1">
                               <p className="text-xs text-muted-foreground font-medium">
-                                Products:
+                                Additional Products:
                               </p>
                               <p className="text-sm text-muted-foreground">
                                 {order.additionalProducts}
