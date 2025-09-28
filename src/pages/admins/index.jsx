@@ -3,6 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogFooter, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogTrigger 
+} from '../../components/ui/dialog';
 import Sidebar from '../../components/Sidebar';
 import { 
   Users, 
@@ -16,7 +25,8 @@ import {
   Shield,
   Mail,
   Calendar,
-  Activity
+  Activity,
+  AlertTriangle
 } from 'lucide-react';
 
 const Admins = () => {
@@ -27,13 +37,13 @@ const Admins = () => {
   const [filterRole, setFilterRole] = useState('all');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [adminToDelete, setAdminToDelete] = useState(null);
   const navigate = useNavigate();
 
-  // Check if device is mobile
   React.useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
-      // Auto-collapse sidebar on mobile
       if (window.innerWidth < 768) {
         setSidebarCollapsed(true);
       }
@@ -63,7 +73,6 @@ const Admins = () => {
 
       if (response.ok) {
         const data = await response.json();
-        // Handle the response structure: { message: "...", users: [...] }
         setAdmins(data.users || data.admins || data); 
       } else {
         setError('Failed to fetch admins');
@@ -75,13 +84,16 @@ const Admins = () => {
     }
   };
 
-  const handleDeleteAdmin = async (adminId) => {
-    if (!window.confirm('Are you sure you want to delete this admin?')) {
-      return;
-    }
+  const handleDeleteClick = (adminId) => {
+    setAdminToDelete(adminId);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!adminToDelete) return;
 
     try {
-      const response = await fetch(`https://skyscale-be.onrender.com/api/auth/delete/${adminId}`, {
+      const response = await fetch(`https://skyscale-be.onrender.com/api/auth/delete/${adminToDelete}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -90,12 +102,16 @@ const Admins = () => {
 
       if (response.ok) {
         // Remove admin from local state
-        setAdmins(admins.filter(admin => admin.id !== adminId));
+        setAdmins(admins.filter(admin => admin.id !== adminToDelete));
+        setError(''); // Clear any previous errors
       } else {
         setError('Failed to delete admin');
       }
     } catch {
       setError('Network error while deleting admin');
+    } finally {
+      setDeleteDialogOpen(false);
+      setAdminToDelete(null);
     }
   };
 
@@ -302,22 +318,6 @@ const Admins = () => {
               </CardHeader>
               
               <CardContent className="pt-0">
-                <div className="space-y-2">
-                  {admin.createdAt && (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Calendar className="h-3 w-3" />
-                      Created: {new Date(admin.createdAt).toLocaleDateString()}
-                    </div>
-                  )}
-                  
-                  {admin.lastLogin && (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Calendar className="h-3 w-3" />
-                      Last Login: {new Date(admin.lastLogin).toLocaleDateString()}
-                    </div>
-                  )}
-                </div>
-                
                 <div className="flex gap-2 pt-2">
                   <Button
                     variant="outline"
@@ -332,7 +332,7 @@ const Admins = () => {
                   <Button
                     variant="destructive"
                     size="sm"
-                    onClick={() => handleDeleteAdmin(admin.id || admin._id)}
+                    onClick={() => handleDeleteClick(admin.id || admin._id)}
                     className="flex-1 group/btn text-sm"
                   >
                     <Trash2 className="h-3 w-3 mr-1" />
@@ -368,6 +368,40 @@ const Admins = () => {
         )}
         </div>
       </main>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              Delete Admin
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this admin? This action cannot be undone.
+              {adminToDelete && (
+                <span className="block mt-2 text-sm font-medium">
+                  Admin ID: {adminToDelete}
+                </span>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteConfirm}
+            >
+              Delete Admin
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
