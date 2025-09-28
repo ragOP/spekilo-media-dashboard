@@ -75,6 +75,14 @@ const Records = () => {
       allowedRoles: ["admin", "astro"], // Astra Soul records - admin and astro only
     },
     {
+      id: "#REC-054",
+      website: "Soul Mate Sketch",
+      domain: "https://www.easyastro.in/soulmatesketch",
+      title: "Soul Mate Sketch",
+      route: "lander3",
+      allowedRoles: ["admin", "astro"], // Easy Astro records - admin and astro only
+    },
+    {
       id: "#REC-047",
       website: "Signature Main",
       domain: "https://www.thesignaturestudio.in/signature/",
@@ -128,14 +136,6 @@ const Records = () => {
       domain: "https://www.easyastro.in/sister2",
       title: "Sister 2",
       route: "lander5",
-      allowedRoles: ["admin", "astro"], // Easy Astro records - admin and astro only
-    },
-    {
-      id: "#REC-054",
-      website: "Soul Mate Sketch",
-      domain: "https://www.easyastro.in/soulmatesketch",
-      title: "Soul Mate Sketch",
-      route: "lander3",
       allowedRoles: ["admin", "astro"], // Easy Astro records - admin and astro only
     },
   ];
