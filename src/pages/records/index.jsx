@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
 import {
   Card,
   CardContent,
@@ -32,6 +33,7 @@ import {
 
 const Records = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -54,14 +56,15 @@ const Records = () => {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  // Website records data
-  const websites = [
+  // Website records data with role-based access
+  const allWebsites = [
     {
       id: "#REC-045",
       website: "Astra Soul",
       domain: "https://www.astrasoul.in/",
       title: "Astra Soul",
       route: "lander1",
+      allowedRoles: ["admin", "astro"], // Astra Soul records - admin and astro only
     },
     {
       id: "#REC-046",
@@ -69,13 +72,15 @@ const Records = () => {
       domain: "https://www.astrasoul.in/love-record",
       title: "AstraSoul Love",
       route: "lander2",
+      allowedRoles: ["admin", "astro"], // Astra Soul records - admin and astro only
     },
     {
       id: "#REC-047",
       website: "Signature Main",
-      domain: "https://www.astrasoul.in/signature/",
+      domain: "https://www.thesignaturestudio.in/signature/",
       title: "Signature Main",
       route: "lander4",
+      allowedRoles: ["admin", "signature"], // Signature records - admin and signature only
     },
     {
       id: "#REC-048",
@@ -83,6 +88,7 @@ const Records = () => {
       domain: "https://www.thesignaturestudio.in/new",
       title: "Signature New",
       route: "lander42",
+      allowedRoles: ["admin", "signature"], // Signature records - admin and signature only
     },
     {
       id: "#REC-049",
@@ -90,6 +96,7 @@ const Records = () => {
       domain: "https://www.thesignaturestudio.in/signature-new ",
       title: "Signature New 2",
       route: "rag",
+      allowedRoles: ["admin", "signature"], // Signature records - admin and signature only
     },
     {
       id: "#REC-050",
@@ -97,6 +104,7 @@ const Records = () => {
       domain: "https://www.easyastro.in/",
       title: "Easy Astro",
       route: "lander3",
+      allowedRoles: ["admin", "astro"], // Easy Astro records - admin and astro only
     },
     {
       id: "#REC-051",
@@ -104,6 +112,7 @@ const Records = () => {
       domain: "https://www.easyastro.in/exp",
       title: "Easy Astro Exp",
       route: "lander7",
+      allowedRoles: ["admin", "astro"], // Easy Astro records - admin and astro only
     },
     {
       id: "#REC-052",
@@ -111,6 +120,7 @@ const Records = () => {
       domain: "https://www.easyastro.in/sister",
       title: "Sister",
       route: "lander3",
+      allowedRoles: ["admin", "astro"], // Easy Astro records - admin and astro only
     },
     {
       id: "#REC-053",
@@ -118,6 +128,7 @@ const Records = () => {
       domain: "https://www.easyastro.in/sister2",
       title: "Sister 2",
       route: "lander5",
+      allowedRoles: ["admin", "astro"], // Easy Astro records - admin and astro only
     },
     {
       id: "#REC-054",
@@ -125,8 +136,15 @@ const Records = () => {
       domain: "https://www.easyastro.in/soulmatesketch",
       title: "Soul Mate Sketch",
       route: "lander3",
+      allowedRoles: ["admin", "astro"], // Easy Astro records - admin and astro only
     },
   ];
+
+  // Filter websites based on user role
+  const websites = allWebsites.filter((website) => {
+    if (!user || !user.role) return false;
+    return website.allowedRoles.includes(user.role.toLowerCase());
+  });
 
   // Filter websites based on search and status
   const filteredWebsites = websites.filter((website) => {

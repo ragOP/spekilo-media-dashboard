@@ -42,12 +42,19 @@ const Sidebar = ({ collapsed, onToggle }) => {
     setMobileMenuOpen(false);
   }, [location.pathname]);
 
-  const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/' },
-    { id: 'records', label: 'Show Records', icon: FileText, path: '/records' },
-    { id: 'abandoned', label: 'Abandoned Records', icon: Archive, path: '/abandoned' },
-    { id: 'admins', label: 'Admin Management', icon: Users, path: '/admins' },
+  // Define all menu items
+  const allMenuItems = [
+    { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/', roles: ['admin', 'signature', 'astro'] },
+    { id: 'records', label: 'Show Records', icon: FileText, path: '/records', roles: ['admin', 'signature', 'astro'] },
+    { id: 'abandoned', label: 'Abandoned Records', icon: Archive, path: '/abandoned', roles: ['admin', 'signature', 'astro'] },
+    { id: 'admins', label: 'Admin Management', icon: Users, path: '/admins', roles: ['admin'] },
   ];
+
+  // Filter menu items based on user role
+  const menuItems = allMenuItems.filter(item => {
+    if (!user || !user.role) return false;
+    return item.roles.includes(user.role.toLowerCase());
+  });
 
   const getActiveItem = () => {
     const currentPath = location.pathname;

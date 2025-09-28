@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
 import {
   Card,
   CardContent,
@@ -29,6 +30,7 @@ import {
 
 const Abandoned = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("recent");
@@ -50,79 +52,95 @@ const Abandoned = () => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Abandoned records data with more detailed information
-  const abandonedRecords = [
+  // Abandoned records data with role-based access
+  const allAbandonedRecords = [
     {
       id: "#REC-045",
       website: "Astra Soul",
       domain: "https://www.astrasoul.in/",
       title: "Astra Soul",
-      route: ""
+      route: "",
+      allowedRoles: ["admin", "astro"], // Astra Soul records - admin and astro only
     },
     {
       id: "#REC-046",
       website: "AstraSoul Love",
       domain: "https://www.astrasoul.in/love-record",
       title: "AstraSoul Love",
-      route: ""
+      route: "",
+      allowedRoles: ["admin", "astro"], // Astra Soul records - admin and astro only
     },
     {
       id: "#REC-047",
       website: "Signature Main",
-      domain: "https://www.astrasoul.in/signature/",
+      domain: "https://www.thesignaturestudio.in/signature/",
       title: "Signature Main",
-      route: ""
+      route: "",
+      allowedRoles: ["admin", "signature"], // Signature records - admin and signature only
     },
     {
       id: "#REC-048",
       website: "Signature New",
       domain: "https://www.thesignaturestudio.in/new",
       title: "Signature New",
-      route: "lander42"
+      route: "lander42",
+      allowedRoles: ["admin", "signature"], // Signature records - admin and signature only
     },
     {
       id: "#REC-049",
       website: "Signature New 2",
       domain: "https://www.thesignaturestudio.in/signature-new ",
       title: "Signature New 2",
-      route: "rag"
+      route: "rag",
+      allowedRoles: ["admin", "signature"], // Signature records - admin and signature only
     },
     {
       id: "#REC-050",
       website: "Easy Astro",
       domain: "https://www.easyastro.in/",
       title: "Easy Astro",
-      route: "lander3"
+      route: "lander3",
+      allowedRoles: ["admin", "astro"], // Easy Astro records - admin and astro only
     },
     {
       id: "#REC-051",
       website: "Easy Astro Exp",
       domain: "https://www.easyastro.in/exp",
       title: "Easy Astro Exp",
-      route: "lander7"
+      route: "lander7",
+      allowedRoles: ["admin", "astro"], // Easy Astro records - admin and astro only
     },
     {
       id: "#REC-052",
       website: "Sister",
       domain: "https://www.easyastro.in/sister",
       title: "Sister",
-      route: "lander5"
+      route: "lander5",
+      allowedRoles: ["admin", "astro"], // Easy Astro records - admin and astro only
     },
     {
       id: "#REC-053",
       website: "Sister 2",
       domain: "https://www.easyastro.in/sister2",
       title: "Sister 2",
-      route: "lander5"
+      route: "lander5",
+      allowedRoles: ["admin", "astro"], // Easy Astro records - admin and astro only
     },
     {
       id: "#REC-054",
       website: "Soul Mate Sketch",
       domain: "https://www.easyastro.in/soulmatesketch",
       title: "Soul Mate Sketch",
-      route: "lander3"
+      route: "lander3",
+      allowedRoles: ["admin", "astro"], // Easy Astro records - admin and astro only
     },
   ];
+
+  // Filter abandoned records based on user role
+  const abandonedRecords = allAbandonedRecords.filter((record) => {
+    if (!user || !user.role) return false;
+    return record.allowedRoles.includes(user.role.toLowerCase());
+  });
 
   // Filter records based on search and reason
   const filteredRecords = abandonedRecords.filter((record) => {

@@ -2,6 +2,7 @@ import React from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
+import RoleProtectedRoute from './components/RoleProtectedRoute'
 import Dashboard from './pages/dashboard';
 import Records from './pages/records';
 import Abandoned from './pages/abandoned';
@@ -45,19 +46,19 @@ const App = () => {
               </ProtectedRoute>
             } />
             <Route path="/admins" element={
-              <ProtectedRoute>
+              <RoleProtectedRoute allowedRoles={['admin']}>
                 <Admins />
-              </ProtectedRoute>
+              </RoleProtectedRoute>
             } />
             <Route path="/admins/register" element={
-              <ProtectedRoute>
+              <RoleProtectedRoute allowedRoles={['admin']}>
                 <AdminRegister />
-              </ProtectedRoute>
+              </RoleProtectedRoute>
             } />
             <Route path="/admins/update/:id" element={
-              <ProtectedRoute>
+              <RoleProtectedRoute allowedRoles={['admin']}>
                 <AdminUpdate />
-              </ProtectedRoute>
+              </RoleProtectedRoute>
             } />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

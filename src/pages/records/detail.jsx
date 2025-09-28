@@ -314,7 +314,7 @@ const DetailPage = () => {
                 <h1 className="text-lg md:text-2xl font-bold truncate">Record Details</h1>
                 <p className="text-sm text-muted-foreground truncate">
                   <span className="inline sm:hidden">{recordDetails.id}</span>
-                  <span className="hidden sm:inline">{recordDetails.id} - {recordDetails.website}</span>
+                  <span className="hidden sm:inline">{recordDetails.id}</span>
                 </p>
               </div>
             </div>

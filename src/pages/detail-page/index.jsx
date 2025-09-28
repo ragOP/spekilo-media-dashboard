@@ -359,7 +359,7 @@ const DetailPage = () => {
                 <p className="text-sm text-muted-foreground truncate">
                   <span className="inline sm:hidden">{recordDetails.id}</span>
                   <span className="hidden sm:inline">
-                    {recordDetails.id} - {recordDetails.website}
+                    {recordDetails.id}
                   </span>
                 </p>
               </div>
