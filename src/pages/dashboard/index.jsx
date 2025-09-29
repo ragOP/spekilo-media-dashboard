@@ -82,19 +82,70 @@ const Dashboard = () => {
     },
   ];
 
-  const recentRecords = [
-      { id: '#REC-045', title: 'Astra Soul', website: 'https://astrasoul.in/', time: '3 hours ago' },
-      { id: '#REC-046', title: 'AstraSoul Love', website: 'https://astrasoul.in/love-record', time: '5 hours ago' },
-      { id: '#REC-047', title: 'Signature Main', website: 'https://astrasoul.in/signature/', time: '1 day ago' },
-      { id: '#REC-048', title: 'Easy Astro', website: 'https://www.easyastro.in/', time: '1 day ago' },
-  ];
+  const [recentRecords, setRecentRecords] = useState([]);
+  const [abandonedRecords, setAbandonedRecords] = useState([]);
 
-  const abandonedRecords = [
-    { id: '#REC-045', title: 'Astra Soul', website: 'https://astrasoul.in/', time: '3 hours ago' },
-    { id: '#REC-046', title: 'AstraSoul Love', website: 'https://astrasoul.in/love-record', time: '5 hours ago' },
-    { id: '#REC-047', title: 'Signature Main', website: 'https://astrasoul.in/signature/', time: '1 day ago' },
-    { id: '#REC-048', title: 'Easy Astro', website: 'https://www.easyastro.in/', time: '1 day ago' },
-  ];
+  // Formats ISO time to a simple relative string like "3 hours ago"
+  const formatRelativeTime = (isoString) => {
+    try {
+      const now = new Date();
+      const then = new Date(isoString);
+      const diffMs = now - then;
+      const minutes = Math.floor(diffMs / (1000 * 60));
+      const hours = Math.floor(minutes / 60);
+      const days = Math.floor(hours / 24);
+      if (minutes < 1) return 'just now';
+      if (minutes < 60) return `${minutes} min${minutes === 1 ? '' : 's'} ago`;
+      if (hours < 24) return `${hours} hour${hours === 1 ? '' : 's'} ago`;
+      return `${days} day${days === 1 ? '' : 's'} ago`;
+    } catch {
+      return 'unknown';
+    }
+  };
+
+  React.useEffect(() => {
+    const loadStats = async () => {
+      try {
+        const [recordsRes, abandonedRes] = await Promise.all([
+          fetch('https://skyscale-be.onrender.com/api/auth/get-stats/record'),
+          fetch('https://skyscale-be.onrender.com/api/auth/get-stats/abandoned')
+        ]);
+
+        const [recordsJson, abandonedJson] = await Promise.all([
+          recordsRes.json(),
+          abandonedRes.json()
+        ]);
+
+        const toArray = (statsObj) => {
+          const entries = Object.values(statsObj || {});
+          return entries.map((s, idx) => ({
+            id: `#REC-${String(idx + 1).padStart(3, '0')}`,
+            title: s?.title ?? 'Untitled',
+            count: Number(s?.count ?? 0),
+            time: s?.lastOrderTime ? formatRelativeTime(s.lastOrderTime) : 'No orders yet',
+            lastOrderTime: s?.lastOrderTime ?? null
+          }));
+        };
+
+        const sortByCountDescThenTime = (a, b) => {
+          if (b.count !== a.count) return b.count - a.count;
+          const aTime = a.lastOrderTime ? new Date(a.lastOrderTime).getTime() : 0;
+          const bTime = b.lastOrderTime ? new Date(b.lastOrderTime).getTime() : 0;
+          return bTime - aTime;
+        };
+
+        const recent = toArray(recordsJson?.stats).sort(sortByCountDescThenTime);
+        const abandoned = toArray(abandonedJson?.stats).sort(sortByCountDescThenTime);
+
+        setRecentRecords(recent);
+        setAbandonedRecords(abandoned);
+      } catch (err) {
+        console.error('Failed to load stats', err);
+      }
+    };
+
+    loadStats();
+  }, []);
 
 
   return (
