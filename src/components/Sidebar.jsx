@@ -44,9 +44,9 @@ const Sidebar = ({ collapsed, onToggle }) => {
 
   // Define all menu items
   const allMenuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/', roles: ['admin', 'signature', 'astro'] },
-    { id: 'records', label: 'Show Records', icon: FileText, path: '/records', roles: ['admin', 'signature', 'astro'] },
-    { id: 'abandoned', label: 'Abandoned Records', icon: Archive, path: '/abandoned', roles: ['admin', 'signature', 'astro'] },
+    { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/', roles: ['admin', 'signature', 'astro', 'astra'] },
+    { id: 'records', label: 'Show Records', icon: FileText, path: '/records', roles: ['admin', 'signature', 'astro', 'astra'] },
+    { id: 'abandoned', label: 'Abandoned Records', icon: Archive, path: '/abandoned', roles: ['admin', 'signature', 'astro', 'astra'] },
     { id: 'admins', label: 'Admin Management', icon: Users, path: '/admins', roles: ['admin'] },
   ];
 

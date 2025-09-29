@@ -118,8 +118,8 @@ const Dashboard = () => {
         ] = await Promise.all([
           fetch('https://skyscale-be.onrender.com/api/auth/get-stats/record').catch(() => null),
           fetch('https://skyscale-be.onrender.com/api/auth/get-stats/abandoned').catch(() => null),
-          fetch('https://skyscale-be.onrender.com/api/auth/get-stats/signature').catch(() => null),
-          fetch('https://skyscale-be.onrender.com/api/auth/get-stats/signature-abandoned').catch(() => null)
+          fetch('https://signature-backend-bm3q.onrender.com/api/auth/get-stats/record').catch(() => null),
+          fetch('https://signature-backend-bm3q.onrender.com/api/auth/get-stats/abandoned').catch(() => null)
         ]);
 
         const [recordsJson, abandonedJson, signatureJson, signatureAbandonedJson] = await Promise.all([
@@ -422,10 +422,10 @@ const Dashboard = () => {
                     </div>
                     <Button 
                       className="w-full group/btn bg-black hover:bg-gray-800 text-white border-0 shadow-md hover:shadow-lg transition-all duration-200 py-6" 
-                      onClick={() => navigate('/signatures')}
+                      onClick={() => navigate('/records')}
                     >
                       <BarChart3 className="w-4 h-4 mr-2" />
-                      View All Signatures
+                      View All Records
                       <ArrowRight className="w-4 h-4 ml-2 group-hover/btn:translate-x-1 transition-transform" />
                     </Button>
                   </CardContent>
@@ -483,10 +483,10 @@ const Dashboard = () => {
                     </div>
                     <Button 
                       className="w-full group/btn bg-black hover:bg-gray-800 text-white border-0 shadow-md hover:shadow-lg transition-all duration-200 py-6" 
-                      onClick={() => navigate('/abandoned-signatures')}
+                      onClick={() => navigate('/abandoned')}
                     >
                       <Archive className="w-4 h-4 mr-2" />
-                      Review Abandoned Signatures
+                      View All Abandoned
                       <ArrowRight className="w-4 h-4 ml-2 group-hover/btn:translate-x-1 transition-transform" />
                     </Button>
                   </CardContent>
