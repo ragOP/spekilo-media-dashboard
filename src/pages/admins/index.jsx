@@ -101,9 +101,10 @@ const Admins = () => {
       });
 
       if (response.ok) {
-        // Remove admin from local state
-        setAdmins(admins.filter(admin => admin.id !== adminToDelete));
-        setError(''); // Clear any previous errors
+        // Remove admin from local state (support id and _id) and then refetch to sync
+        setAdmins(prev => prev.filter(admin => (admin.id ?? admin._id) !== adminToDelete));
+        setError('');
+        fetchAdmins();
       } else {
         setError('Failed to delete admin');
       }

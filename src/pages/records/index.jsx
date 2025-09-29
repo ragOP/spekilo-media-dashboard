@@ -311,7 +311,7 @@ const Records = () => {
                       className="flex-1 group/btn text-sm bg-black hover:bg-gray-800 text-white"
                       disabled={website.route === ""}
                       onClick={() => {
-                        navigate(`/records/${website.route}`);
+                        navigate(`/records/${website.route}?website=${website.domain}`);
                       }}
                     >
                       <Eye className="w-4 h-4 mr-2" />

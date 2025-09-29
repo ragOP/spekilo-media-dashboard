@@ -276,7 +276,7 @@ const Abandoned = () => {
                       className="flex-1 group/btn text-sm bg-black hover:bg-gray-800 text-white"
                       disabled = {record.route === ""}
                       onClick={() =>
-                        navigate(`/abandoned/${record.route}`)
+                        navigate(`/abandoned/${record.route}?website=${record.domain}`)
                       }
                     >
                       <Eye className="w-4 h-4 mr-2" />

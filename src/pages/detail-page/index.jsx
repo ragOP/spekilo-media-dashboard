@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import {
   Card,
   CardContent,
@@ -35,6 +35,7 @@ import {
 
 const DetailPage = () => {
   const { id } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -46,7 +47,7 @@ const DetailPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState("table");
   const [isMobile, setIsMobile] = useState(false);
-
+  const [websiteParam, setWebsiteParam] = useState('');
   const [orderData, setOrderData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -182,13 +183,20 @@ const DetailPage = () => {
   
   // Check if user is admin
   const isAdmin = user?.role?.toLowerCase() === 'admin';
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const websiteFromQuery = params.get('website');
+    if (websiteFromQuery) {
+      setWebsiteParam(websiteFromQuery);
+    }
+  }, [location.search]);
 
   const recordDetails = {
-    id: id || "#REC-045",
-    website: "easyAstro.in",
-    domain: "easyastro.in",
+    id: id || '#REC-045',
+    website: websiteParam || 'easyastro.in',
+    domain: websiteParam || 'easyastro.in',
     title: "Abandoned Records",
-    reason: "Timeout",
+    reason: "",
     description:
       "A place to view the details of the orders",
     abandonedAt: "2024-09-24T10:30:00Z",
@@ -398,9 +406,9 @@ const DetailPage = () => {
                   Record Details
                 </h1>
                 <p className="text-sm text-muted-foreground truncate">
-                  <span className="inline sm:hidden">{recordDetails.id}</span>
+                  <span className="inline sm:hidden">{recordDetails.website}</span>
                   <span className="hidden sm:inline">
-                    {recordDetails.id}
+                    {recordDetails.website}
                   </span>
                 </p>
               </div>

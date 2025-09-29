@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -27,9 +27,11 @@ import {
 
 const DetailPage = () => {
   const { id } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [websiteParam, setWebsiteParam] = useState('');
   const [dateFilter, setDateFilter] = useState('today');
   const [customDateRange, setCustomDateRange] = useState({ start: '', end: '' });
   const [searchQuery, setSearchQuery] = useState('');
@@ -59,12 +61,21 @@ const DetailPage = () => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Read website from query params
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const websiteFromQuery = params.get('website');
+    if (websiteFromQuery) {
+      setWebsiteParam(websiteFromQuery);
+    }
+  }, [location.search]);
+
   const recordDetails = {
     id: id || '#REC-045',
-    website: 'easyAstro.in',
-    domain: 'easyastro.in',
+    website: websiteParam || 'easyastro.in',
+    domain: websiteParam || 'easyastro.in',
     title: 'Order Details',
-    reason: 'Timeout',
+    reason: '',
     description: 'A place to view the details of the orders',
     abandonedAt: '2024-09-24T10:30:00Z',
     severity: 'N/A',
@@ -364,10 +375,10 @@ const DetailPage = () => {
               </Button>
               <div className="min-w-0 flex-1">
                 <h1 className="text-lg md:text-2xl font-bold truncate">Record Details</h1>
-                <p className="text-sm text-muted-foreground truncate">
-                  <span className="inline sm:hidden">{recordDetails.id}</span>
-                  <span className="hidden sm:inline">{recordDetails.id}</span>
-                </p>
+                <span className="inline sm:hidden">{recordDetails.website}</span>
+                  <span className="hidden sm:inline">
+                    {recordDetails.website}
+                  </span>
               </div>
             </div>
             <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
