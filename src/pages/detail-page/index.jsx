@@ -179,10 +179,10 @@ const DetailPage = () => {
     id: id || "#REC-045",
     website: "easyAstro.in",
     domain: "easyastro.in",
-    title: "Account Verification Process",
+    title: "Abandoned Records",
     reason: "Timeout",
     description:
-      "User verification process timed out after 15 minutes of inactivity",
+      "A place to view the details of the orders",
     abandonedAt: "2024-09-24T10:30:00Z",
     severity: "medium",
     category: "Authentication",

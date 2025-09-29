@@ -175,7 +175,7 @@ const Admins = () => {
             <div className="flex items-center gap-2 md:gap-3">
               <Button 
                 onClick={() => navigate('/admins/register')}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 bg-black hover:bg-gray-800 text-white"
                 size="sm"
               >
                 <UserPlus className="h-4 w-4" />
@@ -189,47 +189,47 @@ const Admins = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 animate-fade-in">
-          <Card className="hover:shadow-lg hover:scale-105 transition-all duration-300 animate-scale-in border-0 shadow-sm bg-gradient-to-br from-card to-card/50">
+          <Card className="hover:shadow-lg hover:scale-105 transition-all duration-300 animate-scale-in border border-gray-200 shadow-sm bg-white">
             <CardContent className="p-3 md:p-6">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <Users className="h-5 w-5 md:h-6 md:w-6 text-primary" />
+                <div className="p-2 bg-gray-100 rounded-lg">
+                  <Users className="h-5 w-5 md:h-6 md:w-6 text-black" />
                 </div>
                 <div>
-                  <p className="text-lg md:text-2xl font-bold">{admins.length}</p>
-                  <p className="text-xs md:text-sm text-muted-foreground">Total Admins</p>
+                  <p className="text-lg md:text-2xl font-bold text-black">{admins.length}</p>
+                  <p className="text-xs md:text-sm text-gray-600">Total Admins</p>
                 </div>
               </div>
             </CardContent>
           </Card>
           
-          <Card className="hover:shadow-lg hover:scale-105 transition-all duration-300 animate-scale-in border-0 shadow-sm bg-gradient-to-br from-card to-card/50">
+          <Card className="hover:shadow-lg hover:scale-105 transition-all duration-300 animate-scale-in border border-gray-200 shadow-sm bg-white">
             <CardContent className="p-3 md:p-6">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-secondary/10 rounded-lg">
-                  <Shield className="h-5 w-5 md:h-6 md:w-6 text-secondary-foreground" />
+                <div className="p-2 bg-gray-100 rounded-lg">
+                  <Shield className="h-5 w-5 md:h-6 md:w-6 text-black" />
                 </div>
                 <div>
-                  <p className="text-lg md:text-2xl font-bold">
+                  <p className="text-lg md:text-2xl font-bold text-black">
                     {admins.filter(admin => admin.role?.toLowerCase() === 'signature').length}
                   </p>
-                  <p className="text-xs md:text-sm text-muted-foreground">Signature Admins</p>
+                  <p className="text-xs md:text-sm text-gray-600">Signature Admins</p>
                 </div>
               </div>
             </CardContent>
           </Card>
           
-          <Card className="hover:shadow-lg hover:scale-105 transition-all duration-300 animate-scale-in border-0 shadow-sm bg-gradient-to-br from-card to-card/50 md:col-span-1 col-span-2">
+          <Card className="hover:shadow-lg hover:scale-105 transition-all duration-300 animate-scale-in border border-gray-200 shadow-sm bg-white md:col-span-1 col-span-2">
             <CardContent className="p-3 md:p-6">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-destructive/10 rounded-lg">
-                  <Shield className="h-5 w-5 md:h-6 md:w-6 text-destructive" />
+                <div className="p-2 bg-gray-100 rounded-lg">
+                  <Shield className="h-5 w-5 md:h-6 md:w-6 text-black" />
                 </div>
                 <div>
-                  <p className="text-lg md:text-2xl font-bold">
+                  <p className="text-lg md:text-2xl font-bold text-black">
                     {admins.filter(admin => admin.role?.toLowerCase() === 'astro').length}
                   </p>
-                  <p className="text-xs md:text-sm text-muted-foreground">Astro Admins</p>
+                  <p className="text-xs md:text-sm text-gray-600">Astro Admins</p>
                 </div>
               </div>
             </CardContent>
@@ -237,31 +237,31 @@ const Admins = () => {
         </div>
 
         {/* Search and Filter */}
-        <Card className="border-0 shadow-sm bg-gradient-to-r from-card to-card/50">
+        <Card className="border border-gray-200 shadow-sm bg-white">
           <CardContent className="p-3 md:p-4">
             <div className="flex flex-col md:flex-row gap-3 md:gap-4 items-center">
               <div className="relative flex-1 w-full">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-600 w-4 h-4" />
                 <input
                   type="text"
                   placeholder={isMobile ? "Search admins..." : "Search admins by name or email..."}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-gray-400/20 focus:border-gray-400"
                 />
               </div>
               <div className="flex gap-2 w-full md:w-auto">
                 <select
                   value={filterRole}
                   onChange={(e) => setFilterRole(e.target.value)}
-                  className="flex-1 md:flex-none px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  className="flex-1 md:flex-none px-3 py-2 border border-gray-200 rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-gray-400/20 focus:border-gray-400"
                 >
                   <option value="all">All Roles</option>
                   <option value="admin">Admin</option>
                   <option value="signature">Signature</option>
                   <option value="astro">Astro</option>
                 </select>
-                <Button variant="outline" onClick={fetchAdmins} size="sm">
+                <Button variant="outline" onClick={fetchAdmins} size="sm" className="border-gray-200 text-black hover:bg-gray-50">
                   <Filter className="h-4 w-4" />
                 </Button>
               </div>
@@ -271,10 +271,10 @@ const Admins = () => {
 
         {/* Results Summary */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-gray-600">
             Showing {filteredAdmins.length} of {admins.length} admins
           </p>
-          <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
+          <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
             <Activity className="w-3 h-3 sm:w-4 sm:h-4" />
             Last updated: just now
           </div>
@@ -282,7 +282,7 @@ const Admins = () => {
 
         {/* Error Message */}
         {error && (
-          <div className="p-4 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md">
+          <div className="p-4 text-sm text-gray-600 bg-gray-100 border border-gray-200 rounded-md">
             {error}
           </div>
         )}
@@ -292,26 +292,26 @@ const Admins = () => {
           {filteredAdmins.map((admin, index) => (
             <Card 
               key={admin.id || admin._id} 
-              className="hover:shadow-xl hover:scale-[1.02] transition-all duration-300 border-0 shadow-md bg-gradient-to-br from-card to-card/50 group"
+              className="hover:shadow-xl hover:scale-[1.02] transition-all duration-300 border border-gray-200 shadow-md bg-white group"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                      <Users className="h-5 w-5 text-primary" />
+                    <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
+                      <Users className="h-5 w-5 text-black" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <CardTitle className="text-base md:text-lg group-hover:text-primary transition-colors truncate">
+                      <CardTitle className="text-base md:text-lg group-hover:text-gray-700 transition-colors truncate text-black">
                         {admin.name || 'No Name'}
                       </CardTitle>
-                      <CardDescription className="flex items-center gap-1 mt-1">
+                      <CardDescription className="flex items-center gap-1 mt-1 text-gray-600">
                         <Mail className="h-3 w-3 flex-shrink-0" />
                         <span className="truncate">{admin.email}</span>
                       </CardDescription>
                     </div>
                   </div>
-                  <Badge variant={getRoleBadgeVariant(admin.role)} className="flex-shrink-0">
+                  <Badge variant="outline" className="flex-shrink-0 bg-gray-100 text-black border-gray-200">
                     {admin.role || 'User'}
                   </Badge>
                 </div>
@@ -323,7 +323,7 @@ const Admins = () => {
                     variant="outline"
                     size="sm"
                     onClick={() => navigate(`/admins/update/${admin.id || admin._id}`)}
-                    className="flex-1 group/btn text-sm"
+                    className="flex-1 group/btn text-sm border-gray-200 text-black hover:bg-gray-50"
                   >
                     <Edit className="h-3 w-3 mr-1" />
                     <span className="hidden sm:inline">Edit</span>
@@ -333,7 +333,7 @@ const Admins = () => {
                     variant="destructive"
                     size="sm"
                     onClick={() => handleDeleteClick(admin.id || admin._id)}
-                    className="flex-1 group/btn text-sm"
+                    className="flex-1 group/btn text-sm bg-black hover:bg-gray-800 text-white"
                   >
                     <Trash2 className="h-3 w-3 mr-1" />
                     <span className="hidden sm:inline">Delete</span>
@@ -348,18 +348,18 @@ const Admins = () => {
         {/* Empty State */}
         {filteredAdmins.length === 0 && !isLoading && (
           <div className="text-center py-8 md:py-12 px-4">
-            <Users className="w-10 h-10 md:w-12 md:h-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-base md:text-lg font-medium mb-2">
+            <Users className="w-10 h-10 md:w-12 md:h-12 text-gray-600 mx-auto mb-4" />
+            <h3 className="text-base md:text-lg font-medium mb-2 text-black">
               No admins found
             </h3>
-            <p className="text-sm text-muted-foreground mb-4">
+            <p className="text-sm text-gray-600 mb-4">
               {searchTerm || filterRole !== 'all' 
                 ? 'Try adjusting your search or filter criteria.'
                 : 'Get started by adding your first admin.'
               }
             </p>
             {(!searchTerm && filterRole === 'all') && (
-              <Button onClick={() => navigate('/admins/register')}>
+              <Button onClick={() => navigate('/admins/register')} className="bg-black hover:bg-gray-800 text-white">
                 <Plus className="h-4 w-4 mr-2" />
                 Add First Admin
               </Button>

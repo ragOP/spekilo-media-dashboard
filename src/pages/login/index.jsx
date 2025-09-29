@@ -51,30 +51,30 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-white p-4">
       <div className="w-full max-w-md">
-        <Card className="glass-effect animate-scale-in">
+        <Card className="border border-gray-200 shadow-lg animate-scale-in bg-white">
           <CardHeader className="space-y-1 text-center">
-            <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-2xl font-bold text-black">Welcome Back</CardTitle>
+            <CardDescription className="text-gray-600">
               Enter your credentials to access your dashboard
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <label htmlFor="email" className="text-sm font-medium">
+                <label htmlFor="email" className="text-sm font-medium text-black">
                   Email
                 </label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-600" />
                   <input
                     id="email"
                     type="email"
                     placeholder="Enter your email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-input rounded-md bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                    className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-md bg-white text-black placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent"
                     required
                     disabled={isLoading}
                   />
@@ -82,25 +82,25 @@ const Login = () => {
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="password" className="text-sm font-medium">
+                <label htmlFor="password" className="text-sm font-medium text-black">
                   Password
                 </label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-600" />
                   <input
                     id="password"
                     type={showPassword ? 'text' : 'password'}
                     placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-10 pr-12 py-2 border border-input rounded-md bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                    className="w-full pl-10 pr-12 py-2 border border-gray-200 rounded-md bg-white text-black placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent"
                     required
                     disabled={isLoading}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-3 h-4 w-4 text-muted-foreground hover:text-foreground transition-colors"
+                    className="absolute right-3 top-3 h-4 w-4 text-gray-600 hover:text-black transition-colors"
                     disabled={isLoading}
                   >
                     {showPassword ? <EyeOff /> : <Eye />}
@@ -109,14 +109,14 @@ const Login = () => {
               </div>
 
               {error && (
-                <div className="p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md">
+                <div className="p-3 text-sm text-gray-600 bg-gray-100 border border-gray-200 rounded-md">
                   {error}
                 </div>
               )}
 
               <Button
                 type="submit"
-                className="w-full"
+                className="w-full bg-black hover:bg-gray-800 text-white"
                 disabled={isLoading}
               >
                 {isLoading ? (
