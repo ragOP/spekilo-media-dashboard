@@ -184,8 +184,8 @@ const DetailPage = () => {
     description:
       "A place to view the details of the orders",
     abandonedAt: "2024-09-24T10:30:00Z",
-    severity: "medium",
-    category: "Authentication",
+    severity: "N/A",
+    category: "N/A",
   };
 
   const handlePageChange = (newPage) => {
