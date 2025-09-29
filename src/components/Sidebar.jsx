@@ -136,7 +136,7 @@ const Sidebar = ({ collapsed, onToggle }) => {
           </div>
           {(!collapsed || isMobile) && (
             <div>
-              <h2 className="font-semibold text-lg">Spkilo Media</h2>
+              <h2 className="font-semibold text-lg">Speklio Media</h2>
               <p className="text-xs text-muted-foreground">Dashboard v1.0</p>
             </div>
           )}
