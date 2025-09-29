@@ -115,19 +115,6 @@ const Admins = () => {
     }
   };
 
-  const getRoleBadgeVariant = (role) => {
-    switch (role?.toLowerCase()) {
-      case 'admin':
-        return 'default';
-      case 'signature':
-        return 'secondary';
-      case 'astro':
-        return 'destructive';
-      default:
-        return 'outline';
-    }
-  };
-
   const filteredAdmins = admins.filter(admin => {
     const matchesSearch = admin.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          admin.email?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -188,7 +175,7 @@ const Admins = () => {
         <div className="p-4 md:p-6 space-y-4 md:space-y-6">
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 animate-fade-in">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 animate-fade-in">
           <Card className="hover:shadow-lg hover:scale-105 transition-all duration-300 animate-scale-in border border-gray-200 shadow-sm bg-white">
             <CardContent className="p-3 md:p-6">
               <div className="flex items-center gap-3">
@@ -219,7 +206,7 @@ const Admins = () => {
             </CardContent>
           </Card>
           
-          <Card className="hover:shadow-lg hover:scale-105 transition-all duration-300 animate-scale-in border border-gray-200 shadow-sm bg-white md:col-span-1 col-span-2">
+          <Card className="hover:shadow-lg hover:scale-105 transition-all duration-300 animate-scale-in border border-gray-200 shadow-sm bg-white">
             <CardContent className="p-3 md:p-6">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-gray-100 rounded-lg">
@@ -230,6 +217,22 @@ const Admins = () => {
                     {admins.filter(admin => admin.role?.toLowerCase() === 'astro').length}
                   </p>
                   <p className="text-xs md:text-sm text-gray-600">Astro Admins</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-lg hover:scale-105 transition-all duration-300 animate-scale-in border border-gray-200 shadow-sm bg-white">
+            <CardContent className="p-3 md:p-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-gray-100 rounded-lg">
+                  <Shield className="h-5 w-5 md:h-6 md:w-6 text-black" />
+                </div>
+                <div>
+                  <p className="text-lg md:text-2xl font-bold text-black">
+                    {admins.filter(admin => admin.role?.toLowerCase() === 'astra').length}
+                  </p>
+                  <p className="text-xs md:text-sm text-gray-600">Astra Admins</p>
                 </div>
               </div>
             </CardContent>
@@ -260,6 +263,7 @@ const Admins = () => {
                   <option value="admin">Admin</option>
                   <option value="signature">Signature</option>
                   <option value="astro">Astro</option>
+                  <option value="astra">Astra</option>
                 </select>
                 <Button variant="outline" onClick={fetchAdmins} size="sm" className="border-gray-200 text-black hover:bg-gray-50">
                   <Filter className="h-4 w-4" />

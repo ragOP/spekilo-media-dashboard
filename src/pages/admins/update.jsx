@@ -323,6 +323,7 @@ const AdminUpdate = () => {
                     <option value="admin">Admin</option>
                     <option value="signature">Signature</option>
                     <option value="astro">Astro</option>
+                    <option value="astra">Astra</option>
                   </select>
                 </div>
               </div>

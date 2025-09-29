@@ -86,6 +86,8 @@ const Dashboard = () => {
 
   const [recentRecords, setRecentRecords] = useState([]);
   const [abandonedRecords, setAbandonedRecords] = useState([]);
+  const [signatureRecords, setSignatureRecords] = useState([]);
+  const [abandonedSignatures, setAbandonedSignatures] = useState([]);
 
   // Formats ISO time to a simple relative string like "3 hours ago"
   const formatRelativeTime = (isoString) => {
@@ -108,14 +110,23 @@ const Dashboard = () => {
   React.useEffect(() => {
     const loadStats = async () => {
       try {
-        const [recordsRes, abandonedRes] = await Promise.all([
-          fetch('https://skyscale-be.onrender.com/api/auth/get-stats/record'),
-          fetch('https://skyscale-be.onrender.com/api/auth/get-stats/abandoned')
+        const [
+          recordsRes,
+          abandonedRes,
+          signatureRes,
+          signatureAbandonedRes
+        ] = await Promise.all([
+          fetch('https://skyscale-be.onrender.com/api/auth/get-stats/record').catch(() => null),
+          fetch('https://skyscale-be.onrender.com/api/auth/get-stats/abandoned').catch(() => null),
+          fetch('https://skyscale-be.onrender.com/api/auth/get-stats/signature').catch(() => null),
+          fetch('https://skyscale-be.onrender.com/api/auth/get-stats/signature-abandoned').catch(() => null)
         ]);
 
-        const [recordsJson, abandonedJson] = await Promise.all([
-          recordsRes.json(),
-          abandonedRes.json()
+        const [recordsJson, abandonedJson, signatureJson, signatureAbandonedJson] = await Promise.all([
+          recordsRes ? recordsRes.json().catch(() => ({})) : ({}),
+          abandonedRes ? abandonedRes.json().catch(() => ({})) : ({}),
+          signatureRes ? signatureRes.json().catch(() => ({})) : ({}),
+          signatureAbandonedRes ? signatureAbandonedRes.json().catch(() => ({})) : ({})
         ]);
 
         const toArray = (statsObj) => {
@@ -138,9 +149,13 @@ const Dashboard = () => {
 
         const recent = toArray(recordsJson?.stats).sort(sortByCountDescThenTime);
         const abandoned = toArray(abandonedJson?.stats).sort(sortByCountDescThenTime);
+        const signatures = toArray(signatureJson?.stats).sort(sortByCountDescThenTime);
+        const signaturesAbandoned = toArray(signatureAbandonedJson?.stats).sort(sortByCountDescThenTime);
 
         setRecentRecords(recent);
         setAbandonedRecords(abandoned);
+        setSignatureRecords(signatures);
+        setAbandonedSignatures(signaturesAbandoned);
       } catch (err) {
         console.error('Failed to load stats', err);
       }
@@ -348,6 +363,130 @@ const Dashboard = () => {
                     >
                       <Archive className="w-4 h-4 mr-2" />
                       Review Abandoned Records
+                      <ArrowRight className="w-4 h-4 ml-2 group-hover/btn:translate-x-1 transition-transform" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 animate-slide-up">
+                <Card className="group hover:shadow-xl hover:scale-[1.01] transition-all duration-300 border border-gray-200 bg-white shadow-lg">
+                  <CardHeader className="pb-4 md:pb-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+                      <div className="flex items-center gap-4">
+                        <div className="p-3 bg-gray-100 rounded-xl flex-shrink-0 shadow-sm group-hover:shadow-md transition-shadow">
+                          <FileText className="w-6 h-6 md:w-7 md:h-7 text-black" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <CardTitle className="text-xl md:text-2xl font-bold truncate text-black">
+                            Signature Records
+                          </CardTitle>
+                          <CardDescription className="text-sm text-gray-600 mt-1">
+                            View and manage all signatures
+                          </CardDescription>
+                        </div>
+                      </div>
+                      <Badge variant="secondary" className="bg-gray-100 text-black border-gray-200 self-start sm:self-auto whitespace-nowrap font-medium px-3 py-1">
+                        {signatureRecords.length} Recent
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="space-y-3">
+                      {signatureRecords.map((record, index) => (
+                        <div 
+                          key={record.id} 
+                          className="group/record flex items-center justify-between p-3 md:p-4 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 cursor-pointer hover:shadow-sm"
+                          style={{animationDelay: `${index * 0.1}s`}}
+                        >
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <div className="p-2 bg-gray-100 rounded-lg flex-shrink-0">
+                              <CheckCircle2 className="w-4 h-4 text-black" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="font-semibold text-sm text-black truncate group-hover/record:text-gray-700 transition-colors">
+                                {record.title}
+                              </p>
+                              <p className="text-xs text-gray-600 truncate">
+                                <span className="inline sm:hidden">{record.id}</span>
+                                <span className="hidden sm:inline">{record.id} • {record.time}</span>
+                              </p>
+                              <p className="text-xs text-gray-600 font-medium truncate sm:hidden">{record.time}</p>
+                            </div>
+                          </div>
+                          <div className="flex-shrink-0">
+                            <div className="w-2 h-2 bg-black rounded-full animate-pulse"></div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <Button 
+                      className="w-full group/btn bg-black hover:bg-gray-800 text-white border-0 shadow-md hover:shadow-lg transition-all duration-200 py-6" 
+                      onClick={() => navigate('/signatures')}
+                    >
+                      <BarChart3 className="w-4 h-4 mr-2" />
+                      View All Signatures
+                      <ArrowRight className="w-4 h-4 ml-2 group-hover/btn:translate-x-1 transition-transform" />
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card className="group hover:shadow-xl hover:scale-[1.01] transition-all duration-300 border border-gray-200 bg-white shadow-lg">
+                  <CardHeader className="pb-4 md:pb-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+                      <div className="flex items-center gap-4">
+                        <div className="p-3 bg-gray-100 rounded-xl flex-shrink-0 shadow-sm group-hover:shadow-md transition-shadow">
+                          <Archive className="w-6 h-6 md:w-7 md:h-7 text-black" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <CardTitle className="text-xl md:text-2xl font-bold truncate text-black">
+                            Abandoned Signatures
+                          </CardTitle>
+                          <CardDescription className="text-sm text-gray-600 mt-1">
+                            Review signatures that need attention
+                          </CardDescription>
+                        </div>
+                      </div>
+                      <Badge variant="secondary" className="bg-gray-100 text-black border-gray-200 self-start sm:self-auto whitespace-nowrap font-medium px-3 py-1">
+                        {abandonedSignatures.length} Pending
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="space-y-3">
+                      {abandonedSignatures.map((record, index) => (
+                        <div 
+                          key={record.id} 
+                          className="group/record flex items-center justify-between p-3 md:p-4 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 cursor-pointer hover:shadow-sm"
+                          style={{animationDelay: `${index * 0.1}s`}}
+                        >
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <div className="p-2 bg-gray-100 rounded-lg flex-shrink-0">
+                              <AlertCircle className="w-4 h-4 text-black" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="font-semibold text-sm text-black truncate group-hover/record:text-gray-700 transition-colors">
+                                {record.title}
+                              </p>
+                              <p className="text-xs text-gray-600 truncate">
+                                <span className="inline sm:hidden">{record.id}</span>
+                                <span className="hidden sm:inline">{record.id} • {record.time}</span>
+                              </p>
+                              <p className="text-xs text-gray-600 font-medium truncate sm:hidden">{record.time}</p>
+                            </div>
+                          </div>
+                          <div className="flex-shrink-0">
+                            <div className="w-2 h-2 bg-black rounded-full animate-pulse"></div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <Button 
+                      className="w-full group/btn bg-black hover:bg-gray-800 text-white border-0 shadow-md hover:shadow-lg transition-all duration-200 py-6" 
+                      onClick={() => navigate('/abandoned-signatures')}
+                    >
+                      <Archive className="w-4 h-4 mr-2" />
+                      Review Abandoned Signatures
                       <ArrowRight className="w-4 h-4 ml-2 group-hover/btn:translate-x-1 transition-transform" />
                     </Button>
                   </CardContent>
