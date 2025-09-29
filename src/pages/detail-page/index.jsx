@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Sidebar from "@/components/Sidebar";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   ArrowLeft,
   Download,
@@ -35,6 +36,7 @@ import {
 const DetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [dateFilter, setDateFilter] = useState("today");
   const [customDateRange, setCustomDateRange] = useState({
@@ -60,8 +62,8 @@ const DetailPage = () => {
         setError(null);
         let url = "";
 
-        if (id === "rag" || id === "lander42") {
-          if (id === "lander42") {
+        if (id === "rag" || id === "lander42" || id === "lander4") {
+          if (id === "lander42" || id === "lander4") {
             url = `https://signature-backend-bm3q.onrender.com/api/lander4/get-orders/abd-main?page=${page}&limit=${limit}`;
           } else {
             url = `https://signature-backend-bm3q.onrender.com/api/signature/${id}/get-orders/abd-main?page=${page}&limit=${limit}`;
@@ -175,6 +177,12 @@ const DetailPage = () => {
     customDateRange.end,
     fetchOrders,
   ]);
+  // Check if this is a signature record
+  const isSignatureRecord = id === "rag" || id === "lander42" || id === "lander4" || id === "signature";
+  
+  // Check if user is admin
+  const isAdmin = user?.role?.toLowerCase() === 'admin';
+
   const recordDetails = {
     id: id || "#REC-045",
     website: "easyAstro.in",
@@ -245,23 +253,30 @@ const DetailPage = () => {
     }
 
     if (searchQuery) {
-      filtered = filtered.filter(
-        (order) =>
-          order.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          order.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          order.orderId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      filtered = filtered.filter((order) => {
+        const searchLower = searchQuery.toLowerCase();
+        const baseMatch = 
+          order.name.toLowerCase().includes(searchLower) ||
+          order.email.toLowerCase().includes(searchLower) ||
+          order.orderId.toLowerCase().includes(searchLower) ||
           order.phone.includes(searchQuery) ||
-          order.gender.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          order.dob.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          order.placeOfBirth.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          (order.profession && order.profession.toLowerCase().includes(searchQuery.toLowerCase())) ||
-          order.additionalProducts.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          order.remarks.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+          order.additionalProducts.toLowerCase().includes(searchLower);
+        
+        if (isSignatureRecord) {
+          return baseMatch ||
+            (order.profession && order.profession.toLowerCase().includes(searchLower)) ||
+            order.remarks.toLowerCase().includes(searchLower);
+        } else {
+          return baseMatch ||
+            order.gender.toLowerCase().includes(searchLower) ||
+            order.dob.toLowerCase().includes(searchLower) ||
+            order.placeOfBirth.toLowerCase().includes(searchLower);
+        }
+      });
     }
 
     return filtered;
-  }, [orderData, dateFilter, customDateRange, searchQuery]);
+  }, [orderData, dateFilter, customDateRange, searchQuery, isSignatureRecord]);
 
   const chartData = useMemo(() => {
     const dailyTotals = {};
@@ -280,38 +295,39 @@ const DetailPage = () => {
   }, [filteredData]);
 
   const exportToCSV = () => {
-    const headers = [
-      "Order ID",
-      "Name",
-      "Email",
-      "Phone",
-      "Gender",
-      "DOB",
-      "Place of Birth",
-      "Profession",
-      "Additional Products",
-      "Remarks",
-      "Amount",
-      "Order Date",
-    ];
+    const headers = isSignatureRecord 
+      ? ['Order ID', 'Name', 'Email', 'Phone', 'Profession', 'Remarks', 'Additional Products', ...(isAdmin ? ['Amount'] : []), 'Order Date']
+      : ['Order ID', 'Name', 'Email', 'Phone', 'Gender', 'DOB', 'Place of Birth', 'Additional Products', ...(isAdmin ? ['Amount'] : []), 'Order Date'];
     const csvContent = [
       headers.join(","),
-      ...filteredData.map((order) =>
-        [
-          order.orderId,
-          `"${order.name}"`,
-          order.email,
-          order.phone,
-          order.gender || "N/A",
-          formatDOB(order.dob),
-          `"${order.placeOfBirth || "N/A"}"`,
-          `"${order.profession || "N/A"}"`,
-          `"${order.additionalProducts}"`,
-          `"${order.remarks || "N/A"}"`,
-          order.amount,
-          new Date(order.orderDate).toLocaleDateString(),
-        ].join(",")
-      ),
+      ...filteredData.map((order) => {
+        if (isSignatureRecord) {
+          return [
+            order.orderId,
+            `"${order.name}"`,
+            order.email,
+            order.phone,
+            `"${order.profession || 'N/A'}"`,
+            `"${order.remarks || 'N/A'}"`,
+            `"${order.additionalProducts}"`,
+            ...(isAdmin ? [order.amount] : []),
+            new Date(order.orderDate).toLocaleDateString()
+          ].join(',');
+        } else {
+          return [
+            order.orderId,
+            `"${order.name}"`,
+            order.email,
+            order.phone,
+            order.gender || "N/A",
+            formatDOB(order.dob),
+            `"${order.placeOfBirth || "N/A"}"`,
+            `"${order.additionalProducts}"`,
+            ...(isAdmin ? [order.amount] : []),
+            new Date(order.orderDate).toLocaleDateString()
+          ].join(',');
+        }
+      }),
     ].join("\n");
 
     const blob = new Blob([csvContent], { type: "text/csv" });
@@ -559,25 +575,27 @@ const DetailPage = () => {
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 md:gap-3 p-3 md:p-4 bg-green-50 rounded-lg">
-                  <div className="min-w-0">
-                    {loading ? (
-                      <div className="flex items-center gap-2">
-                        <Loader2 className="w-4 h-4 animate-spin text-green-600" />
-                        <p className="text-lg md:text-2xl font-bold text-green-600">
-                          ...
+                {isAdmin && (
+                  <div className="flex items-center gap-2 md:gap-3 p-3 md:p-4 bg-green-50 rounded-lg">
+                    <div className="min-w-0">
+                      {loading ? (
+                        <div className="flex items-center gap-2">
+                          <Loader2 className="w-4 h-4 animate-spin text-green-600" />
+                          <p className="text-lg md:text-2xl font-bold text-green-600">
+                            ...
+                          </p>
+                        </div>
+                      ) : (
+                        <p className="text-lg md:text-2xl font-bold text-green-600 truncate">
+                          ₹{getTotalAmount()}
                         </p>
-                      </div>
-                    ) : (
-                      <p className="text-lg md:text-2xl font-bold text-green-600 truncate">
-                        ₹{getTotalAmount()}
+                      )}
+                      <p className="text-xs md:text-sm text-muted-foreground">
+                        {loading ? "Loading..." : "Total Revenue"}
                       </p>
-                    )}
-                    <p className="text-xs md:text-sm text-muted-foreground">
-                      {loading ? "Loading..." : "Total Revenue"}
-                    </p>
+                    </div>
                   </div>
-                </div>
+                )}
                 <div className="flex items-center gap-2 md:gap-3 p-3 md:p-4 bg-orange-50 rounded-lg">
                   <Clock className="w-6 h-6 md:w-8 md:h-8 text-orange-600 flex-shrink-0" />
                   <div className="min-w-0">
@@ -613,9 +631,11 @@ const DetailPage = () => {
                   <input
                     type="text"
                     placeholder={
-                      isMobile
-                        ? "Search orders..."
-                        : "Search by name, email, order ID, gender, DOB, place, profession, or products..."
+                      isMobile 
+                        ? "Search orders..." 
+                        : isSignatureRecord 
+                          ? "Search by name, email, order ID, profession, remarks, or additional products..." 
+                          : "Search by name, email, order ID, gender, DOB, place of birth, or additional products..."
                     }
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -730,15 +750,20 @@ const DetailPage = () => {
                             <th className="text-left p-3 font-medium whitespace-nowrap">Name</th>
                             <th className="text-left p-3 font-medium whitespace-nowrap">Email</th>
                             <th className="text-left p-3 font-medium whitespace-nowrap">Phone</th>
-                            <th className="text-left p-3 font-medium whitespace-nowrap">Gender</th>
-                            <th className="text-left p-3 font-medium whitespace-nowrap">DOB</th>
-                            <th className="text-left p-3 font-medium whitespace-nowrap">Place of Birth</th>
-                            <th className="text-left p-3 font-medium whitespace-nowrap">Profession</th>
+                            {isSignatureRecord ? (
+                              <>
+                                <th className="text-left p-3 font-medium whitespace-nowrap">Profession</th>
+                                <th className="text-left p-3 font-medium whitespace-nowrap">Remarks</th>
+                              </>
+                            ) : (
+                              <>
+                                <th className="text-left p-3 font-medium whitespace-nowrap">Gender</th>
+                                <th className="text-left p-3 font-medium whitespace-nowrap">DOB</th>
+                                <th className="text-left p-3 font-medium whitespace-nowrap">Place of Birth</th>
+                              </>
+                            )}
                             <th className="text-left p-3 font-medium whitespace-nowrap">Additional Products</th>
-                            <th className="text-left p-3 font-medium whitespace-nowrap">Remarks</th>
-                            <th className="text-left p-3 font-medium whitespace-nowrap">
-                              Amount
-                            </th>
+                            {isAdmin && <th className="text-left p-3 font-medium whitespace-nowrap">Amount</th>}
                             <th className="text-left p-3 font-medium whitespace-nowrap">
                               Order Date
                             </th>
@@ -775,26 +800,38 @@ const DetailPage = () => {
                                   <span className="text-sm whitespace-nowrap">{order.phone}</span>
                                 </div>
                               </td>
-                              <td className="p-3">
-                                <span className="text-sm text-muted-foreground whitespace-nowrap">
-                                  {order.gender}
-                                </span>
-                              </td>
-                              <td className="p-3">
-                                <span className="text-sm text-muted-foreground whitespace-nowrap">
-                                  {formatDOB(order.dob)}
-                                </span>
-                              </td>
-                              <td className="p-3">
-                                <span className="text-sm text-muted-foreground whitespace-nowrap">
-                                  {order.placeOfBirth}
-                                </span>
-                              </td>
-                              <td className="p-3">
-                                <span className="text-sm text-muted-foreground whitespace-nowrap">
-                                  {order.profession || "N/A"}
-                                </span>
-                              </td>
+                              {isSignatureRecord ? (
+                                <>
+                                  <td className="p-3">
+                                    <span className="text-sm text-muted-foreground whitespace-nowrap">
+                                      {order.profession || "N/A"}
+                                    </span>
+                                  </td>
+                                  <td className="p-3 max-w-xs">
+                                    <span className="text-sm text-muted-foreground break-words whitespace-pre-wrap" title={order.remarks || 'N/A'}>
+                                      {order.remarks}
+                                    </span>
+                                  </td>
+                                </>
+                              ) : (
+                                <>
+                                  <td className="p-3">
+                                    <span className="text-sm text-muted-foreground whitespace-nowrap">
+                                      {order.gender}
+                                    </span>
+                                  </td>
+                                  <td className="p-3">
+                                    <span className="text-sm text-muted-foreground whitespace-nowrap">
+                                      {formatDOB(order.dob)}
+                                    </span>
+                                  </td>
+                                  <td className="p-3">
+                                    <span className="text-sm text-muted-foreground whitespace-nowrap">
+                                      {order.placeOfBirth}
+                                    </span>
+                                  </td>
+                                </>
+                              )}
                               <td className="p-3">
                                 {order.additionalProducts && order.additionalProducts !== "N/A" ? (
                                   <div className="flex flex-wrap gap-1">
@@ -808,16 +845,13 @@ const DetailPage = () => {
                                   <span className="text-sm text-muted-foreground">N/A</span>
                                 )}
                               </td>
-                              <td className="p-3">
-                                <span className="text-sm text-muted-foreground whitespace-nowrap" title={order.remarks || 'N/A'}>
-                                  {order.remarks}
-                                </span>
-                              </td>
-                              <td className="p-3">
-                                <span className="font-bold text-green-600 whitespace-nowrap">
-                                  {order.amount}
-                                </span>
-                              </td>
+                              {isAdmin && (
+                                <td className="p-3">
+                                  <span className="font-bold text-green-600 whitespace-nowrap">
+                                    {order.amount}
+                                  </span>
+                                </td>
+                              )}
                               <td className="p-3">
                                 <span className="text-sm text-muted-foreground whitespace-nowrap">
                                   {formatDate(order.orderDate)}
@@ -841,9 +875,11 @@ const DetailPage = () => {
                             <span className="font-mono text-sm text-blue-600 font-medium">
                               {order.orderId}
                             </span>
-                            <span className="font-bold text-green-600">
-                              {order.amount}
-                            </span>
+                            {isAdmin && (
+                              <span className="font-bold text-green-600">
+                                {order.amount}
+                              </span>
+                            )}
                           </div>
 
                           <div className="space-y-2">
@@ -868,42 +904,59 @@ const DetailPage = () => {
                               </span>
                             </div>
 
-                            {order.gender && order.gender !== "N/A" && (
-                              <div className="flex items-center gap-2">
-                                <User className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                                <span className="text-sm text-muted-foreground">
-                                  Gender: {order.gender}
-                                </span>
-                              </div>
-                            )}
+                            {isSignatureRecord ? (
+                              <>
+                                {order.profession && order.profession !== "N/A" && (
+                                  <div className="space-y-1">
+                                    <p className="text-xs text-muted-foreground font-medium">
+                                      Profession:
+                                    </p>
+                                    <p className="text-sm text-muted-foreground">
+                                      {order.profession}
+                                    </p>
+                                  </div>
+                                )}
+                                
+                                {order.remarks && order.remarks !== "N/A" && (
+                                  <div className="space-y-1">
+                                    <p className="text-xs text-muted-foreground font-medium">
+                                      Remarks:
+                                    </p>
+                                    <p className="text-sm text-muted-foreground break-words whitespace-pre-wrap">
+                                      {order.remarks}
+                                    </p>
+                                  </div>
+                                )}
+                              </>
+                            ) : (
+                              <>
+                                {order.gender && order.gender !== "N/A" && (
+                                  <div className="flex items-center gap-2">
+                                    <User className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                                    <span className="text-sm text-muted-foreground">
+                                      Gender: {order.gender}
+                                    </span>
+                                  </div>
+                                )}
 
-                            {order.dob && order.dob !== "N/A" && (
-                              <div className="flex items-center gap-2">
-                                <Calendar className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                                <span className="text-sm text-muted-foreground">
-                                  DOB: {formatDOB(order.dob)}
-                                </span>
-                              </div>
-                            )}
+                                {order.dob && order.dob !== "N/A" && (
+                                  <div className="flex items-center gap-2">
+                                    <Calendar className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                                    <span className="text-sm text-muted-foreground">
+                                      DOB: {formatDOB(order.dob)}
+                                    </span>
+                                  </div>
+                                )}
 
-                            {order.placeOfBirth && order.placeOfBirth !== "N/A" && (
-                              <div className="flex items-center gap-2">
-                                <Package className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                                <span className="text-sm text-muted-foreground">
-                                  Place of Birth: {order.placeOfBirth}
-                                </span>
-                              </div>
-                            )}
-
-                            {order.profession && order.profession !== "N/A" && (
-                              <div className="space-y-1">
-                                <p className="text-xs text-muted-foreground font-medium">
-                                  Profession:
-                                </p>
-                                <p className="text-sm text-muted-foreground">
-                                  {order.profession}
-                                </p>
-                              </div>
+                                {order.placeOfBirth && order.placeOfBirth !== "N/A" && (
+                                  <div className="flex items-center gap-2">
+                                    <Package className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                                    <span className="text-sm text-muted-foreground">
+                                      Place of Birth: {order.placeOfBirth}
+                                    </span>
+                                  </div>
+                                )}
+                              </>
                             )}
 
                             {order.additionalProducts && order.additionalProducts !== "N/A" && (
@@ -921,16 +974,6 @@ const DetailPage = () => {
                               </div>
                             )}
 
-                            {order.remarks && order.remarks !== "N/A" && (
-                              <div className="space-y-1">
-                                <p className="text-xs text-muted-foreground font-medium">
-                                  Remarks:
-                                </p>
-                                <p className="text-sm text-muted-foreground">
-                                  {order.remarks}
-                                </p>
-                              </div>
-                            )}
 
                             <div className="flex items-center gap-2 pt-1">
                               <Clock className="w-4 h-4 text-muted-foreground flex-shrink-0" />
@@ -1220,11 +1263,13 @@ const DetailPage = () => {
                       </svg>
                       
                       {/* Chart summary */}
-                      <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-sm border">
-                        <div className="text-sm font-medium text-gray-700">Total Revenue</div>
-                        <div className="text-lg font-bold text-green-600">₹{getTotalAmount()}</div>
-                        <div className="text-xs text-gray-500">{chartData.length} days</div>
-                          </div>
+                      {isAdmin && (
+                        <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-sm border">
+                          <div className="text-sm font-medium text-gray-700">Total Revenue</div>
+                          <div className="text-lg font-bold text-green-600">₹{getTotalAmount()}</div>
+                          <div className="text-xs text-gray-500">{chartData.length} days</div>
+                        </div>
+                      )}
                         </div>
                   ) : (
                     <div className="text-center">
