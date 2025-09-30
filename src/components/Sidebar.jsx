@@ -14,7 +14,8 @@ import {
   X,
   LogOut,
   User,
-  Users
+  Users,
+  Key
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -48,6 +49,7 @@ const Sidebar = ({ collapsed, onToggle }) => {
     { id: 'records', label: 'Show Records', icon: FileText, path: '/records', roles: ['admin', 'signature', 'astro', 'astra'] },
     { id: 'abandoned', label: 'Abandoned Records', icon: Archive, path: '/abandoned', roles: ['admin', 'signature', 'astro', 'astra'] },
     { id: 'admins', label: 'Admin Management', icon: Users, path: '/admins', roles: ['admin'] },
+    { id: 'passwords', label: 'Password Management', icon: Key, path: '/passwords', roles: ['admin'] },
   ];
 
   // Filter menu items based on user role

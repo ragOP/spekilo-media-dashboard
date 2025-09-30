@@ -12,6 +12,9 @@ import Login from './pages/login';
 import Admins from './pages/admins';
 import AdminRegister from './pages/admins/register';
 import AdminUpdate from './pages/admins/update';
+import Passwords from './pages/passwords';
+import PasswordAdd from './pages/passwords/add';
+import PasswordEdit from './pages/passwords/edit';
 
 const App = () => {
   return (
@@ -58,6 +61,21 @@ const App = () => {
             <Route path="/admins/update/:id" element={
               <RoleProtectedRoute allowedRoles={['admin']}>
                 <AdminUpdate />
+              </RoleProtectedRoute>
+            } />
+            <Route path="/passwords" element={
+              <RoleProtectedRoute allowedRoles={['admin']}>
+                <Passwords />
+              </RoleProtectedRoute>
+            } />
+            <Route path="/passwords/add" element={
+              <RoleProtectedRoute allowedRoles={['admin']}>
+                <PasswordAdd />
+              </RoleProtectedRoute>
+            } />
+            <Route path="/passwords/edit/:id" element={
+              <RoleProtectedRoute allowedRoles={['admin']}>
+                <PasswordEdit />
               </RoleProtectedRoute>
             } />
             <Route path="*" element={<Navigate to="/" replace />} />
