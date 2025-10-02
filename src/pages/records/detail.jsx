@@ -148,7 +148,17 @@ const DetailPage = () => {
         gender: order.gender || null,
         placeOfBirth: order.placeOfBirth || null,
         remarks: order.remarks || null,
-        razorpayPaymentId: order.razorpayPaymentId
+        razorpayPaymentId: order.razorpayPaymentId,
+        // Preserve boolean false; don't coerce with || null
+        deliveryStatusEmail: order.deliveryStatusEmail,
+        // Normalize to display string
+        isEmailSent: (typeof order.deliveryStatusEmail === 'boolean')
+          ? (order.deliveryStatusEmail ? 'Yes' : 'No')
+          : (typeof order.deliveryStatusEmail === 'string')
+            ? (order.deliveryStatusEmail.toLowerCase() === 'yes' ? 'Yes' : order.deliveryStatusEmail.toLowerCase() === 'no' ? 'No' : 'N/A')
+            : 'N/A',
+        mongoId: order._id || order.id || null,
+        hasBackendData: order.deliveryStatusEmail !== undefined
       }));
       
       setOrderData(transformedOrders);
@@ -243,7 +253,8 @@ const DetailPage = () => {
           order.email.toLowerCase().includes(searchLower) ||
           order.orderId.toLowerCase().includes(searchLower) ||
           order.phone.includes(searchQuery) ||
-          (order.additionalProducts && order.additionalProducts.toLowerCase().includes(searchLower));
+          (order.additionalProducts && order.additionalProducts.toLowerCase().includes(searchLower)) ||
+          order.isEmailSent.toLowerCase().includes(searchLower);
         
         if (isSignatureRecord) {
           return baseMatch ||
@@ -280,8 +291,8 @@ const DetailPage = () => {
 
   const exportToCSV = () => {
     const headers = isSignatureRecord 
-      ? ['Order ID', 'Name', 'Email', 'Phone', 'Profession', 'Remarks', 'Additional Products', ...(isAdmin ? ['Amount'] : []), 'Order Date']
-      : ['Order ID', 'Name', 'Email', 'Phone', 'Gender', 'DOB', 'Place of Birth', 'Additional Products', ...(isAdmin ? ['Amount'] : []), 'Order Date'];
+      ? ['Order ID', 'Name', 'Email', 'Phone', 'Profession', 'Remarks', 'Additional Products', ...(isAdmin ? ['Amount'] : []), 'Order Date', 'Email Sent']
+      : ['Order ID', 'Name', 'Email', 'Phone', 'Gender', 'DOB', 'Place of Birth', 'Additional Products', ...(isAdmin ? ['Amount'] : []), 'Order Date', 'Email Sent'];
     
     const csvContent = [
       headers.join(','),
@@ -296,7 +307,8 @@ const DetailPage = () => {
             `"${order.remarks || 'N/A'}"`,
             `"${order.additionalProducts || 'N/A'}"`,
             ...(isAdmin ? [order.amount] : []),
-            new Date(order.orderDate).toLocaleDateString()
+            new Date(order.orderDate).toLocaleDateString(),
+            order.isEmailSent
           ].join(',');
         } else {
           return [
@@ -309,7 +321,8 @@ const DetailPage = () => {
             `"${order.placeOfBirth || 'N/A'}"`,
             `"${order.additionalProducts || 'N/A'}"`,
             ...(isAdmin ? [order.amount] : []),
-            new Date(order.orderDate).toLocaleDateString()
+            new Date(order.orderDate).toLocaleDateString(),
+            order.isEmailSent
           ].join(',');
         }
       })
@@ -350,6 +363,82 @@ const DetailPage = () => {
       const numericAmount = parseFloat(cleanAmount) || 0;
       return sum + numericAmount;
     }, 0).toFixed(2);
+  };
+
+  // Function to mark email status as "no"
+  const markEmailStatusAsNo = async (mongoId) => {
+    if (!mongoId) {
+      console.error('No MongoDB ID provided');
+      return;
+    }
+
+    try {
+      const response = await fetch(`https://skyscale-be.onrender.com/api/${id}/delivery-status/${mongoId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          deliveryStatusEmail: false
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // Update the local state to reflect the change
+      setOrderData(prevData => 
+        prevData.map(order => 
+          order.mongoId === mongoId 
+            ? { ...order, deliveryStatusEmail: false, isEmailSent: 'No' }
+            : order
+        )
+      );
+
+      console.log('Email status updated successfully');
+    } catch (error) {
+      console.error('Error updating email status:', error);
+      // You might want to show a toast notification here
+    }
+  };
+
+  // Function to mark email status as "yes"
+  const markEmailStatusAsYes = async (mongoId) => {
+    if (!mongoId) {
+      console.error('No MongoDB ID provided');
+      return;
+    }
+
+    try {
+      const response = await fetch(`https://skyscale-be.onrender.com/api/${id}/delivery-status/${mongoId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          deliveryStatusEmail: true
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // Update the local state to reflect the change
+      setOrderData(prevData => 
+        prevData.map(order => 
+          order.mongoId === mongoId 
+            ? { ...order, deliveryStatusEmail: true, isEmailSent: 'Yes' }
+            : order
+        )
+      );
+
+      console.log('Email status updated successfully');
+    } catch (error) {
+      console.error('Error updating email status:', error);
+      // You might want to show a toast notification here
+    }
   };
 
   return (
@@ -561,8 +650,8 @@ const DetailPage = () => {
                       isMobile 
                         ? "Search orders..." 
                         : isSignatureRecord 
-                          ? "Search by name, email, order ID, profession, remarks, or additional products..." 
-                          : "Search by name, email, order ID, gender, DOB, place of birth, or additional products..."
+                          ? "Search by name, email, order ID, profession, remarks, additional products, or email status..." 
+                          : "Search by name, email, order ID, gender, DOB, place of birth, additional products, or email status..."
                     }
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -649,6 +738,7 @@ const DetailPage = () => {
                         <th className="text-left p-3 font-medium whitespace-nowrap">Additional Products</th>
                         {isAdmin && <th className="text-left p-3 font-medium whitespace-nowrap">Amount</th>}
                         <th className="text-left p-3 font-medium whitespace-nowrap">Order Date</th>
+                        <th className="text-left p-3 font-medium whitespace-nowrap">Email Sent</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -714,6 +804,47 @@ const DetailPage = () => {
                           )}
                           <td className="p-3">
                             <span className="text-sm text-muted-foreground whitespace-nowrap">{formatDate(order.orderDate)}</span>
+                          </td>
+                          <td className="p-3">
+                            <div className="flex items-center gap-2">
+                              {order.isEmailSent === 'Yes' ? (
+                                <div className="flex items-center gap-2">
+                                  <Badge variant="default" className="bg-green-100 text-green-800 border-green-200">
+                                    Yes
+                                  </Badge>
+                                  {order.hasBackendData && order.mongoId && (
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => markEmailStatusAsNo(order.mongoId)}
+                                      className="h-6 px-2 text-xs"
+                                    >
+                                      Mark No
+                                    </Button>
+                                  )}
+                                </div>
+                              ) : order.isEmailSent === 'No' ? (
+                                <div className="flex items-center gap-2">
+                                  <Badge variant="destructive" className="bg-red-100 text-red-800 border-red-200">
+                                    No
+                                  </Badge>
+                                  {order.hasBackendData && order.mongoId && (
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => markEmailStatusAsYes(order.mongoId)}
+                                      className="h-6 px-2 text-xs"
+                                    >
+                                      Mark Yes
+                                    </Button>
+                                  )}
+                                </div>
+                              ) : (
+                                <Badge variant="secondary" className="bg-gray-100 text-gray-600 border-gray-200">
+                                  N/A
+                                </Badge>
+                              )}
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -812,6 +943,50 @@ const DetailPage = () => {
                         <div className="flex items-center gap-2 pt-1">
                           <Clock className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                           <span className="text-xs text-muted-foreground">{formatDate(order.orderDate)}</span>
+                        </div>
+                        
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Mail className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                            <span className="text-xs text-muted-foreground font-medium">Email Sent:</span>
+                            {order.isEmailSent === 'Yes' ? (
+                              <div className="flex items-center gap-2">
+                                <Badge variant="default" className="bg-green-100 text-green-800 border-green-200 text-xs">
+                                  Yes
+                                </Badge>
+                                {order.hasBackendData && order.mongoId && (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => markEmailStatusAsNo(order.mongoId)}
+                                    className="h-5 px-2 text-xs"
+                                  >
+                                    Mark No
+                                  </Button>
+                                )}
+                              </div>
+                            ) : order.isEmailSent === 'No' ? (
+                              <div className="flex items-center gap-2">
+                                <Badge variant="destructive" className="bg-red-100 text-red-800 border-red-200 text-xs">
+                                  No
+                                </Badge>
+                                {order.hasBackendData && order.mongoId && (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => markEmailStatusAsYes(order.mongoId)}
+                                    className="h-5 px-2 text-xs"
+                                  >
+                                    Mark Yes
+                                  </Button>
+                                )}
+                              </div>
+                            ) : (
+                              <Badge variant="secondary" className="bg-gray-100 text-gray-600 border-gray-200 text-xs">
+                                N/A
+                              </Badge>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>

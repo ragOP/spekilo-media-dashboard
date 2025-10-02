@@ -29,6 +29,9 @@ import {
   Eye,
   Edit,
   Trash2,
+  ChevronDown,
+  ChevronRight,
+  ArrowLeft,
 } from "lucide-react";
 
 const Records = () => {
@@ -37,8 +40,8 @@ const Records = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [sortBy] = useState("recent"); // setSortBy removed as it's not used
   const [isMobile, setIsMobile] = useState(false);
+  const [currentView, setCurrentView] = useState('overview'); // 'overview' or category id
 
   // Check if device is mobile
   React.useEffect(() => {
@@ -56,121 +59,147 @@ const Records = () => {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  // Website records data with role-based access
-  const allWebsites = [
+  // Website records data grouped by categories with role-based access
+  const websiteCategories = [
     {
-      id: "#REC-045",
-      website: "Astra Soul",
-      domain: "https://www.astrasoul.in/",
-      title: "Astra Soul",
-      route: "lander1",
+      id: "astra",
+      name: "Astra",
+      description: "Astra Soul websites and services",
       allowedRoles: ["admin", "astra"],
-    },
-    {
-      id: "#REC-046",
-      website: "AstraSoul Love",
-      domain: "https://www.astrasoul.in/love-record",
-      title: "AstraSoul Love",
-      route: "lander2",
-      allowedRoles: ["admin", "astra"],
-    },
+      websites: [
         {
-      id: "#REC-054",
-      website: "Soul Mate Sketch",
-      domain: "https://www.easyastro.in/soulmatesketch",
-      title: "Soul Mate Sketch",
-      route: "lander3",
-      allowedRoles: ["admin", "astro"],
+          id: "#REC-045",
+          website: "Astra Soul",
+          domain: "https://www.astrasoul.in/consultation",
+          title: "Astra Soul",
+          route: "lander1",
+        },
+        {
+          id: "#REC-046",
+          website: "AstraSoul Love",
+          domain: "https://www.astrasoul.in/love-record",
+          title: "AstraSoul Love",
+          route: "lander2",
+        },
+      ],
     },
     {
-      id: "#REC-047",
-      website: "Signature Main",
-      domain: "https://www.thesignaturestudio.in/signature/",
-      title: "Signature Main",
-      route: "lander4",
+      id: "astro",
+      name: "Astro",
+      description: "Easy Astro websites and services",
+      allowedRoles: ["admin", "astro"],
+      websites: [
+        {
+          id: "#REC-054",
+          website: "Soul Mate Sketch",
+          domain: "https://www.easyastro.in/soulmatesketch",
+          title: "Soul Mate Sketch",
+          route: "lander3",
+        },
+        {
+          id: "#REC-050",
+          website: "Easy Astro",
+          domain: "https://www.easyastro.in/",
+          title: "Easy Astro",
+          route: "lander3",
+        },
+        {
+          id: "#REC-051",
+          website: "Easy Astro Exp",
+          domain: "https://www.easyastro.in/exp",
+          title: "Easy Astro Exp",
+          route: "lander7",
+        },
+        {
+          id: "#REC-052",
+          website: "Sister",
+          domain: "https://www.easyastro.in/sister",
+          title: "Sister",
+          route: "lander3",
+        },
+        {
+          id: "#REC-053",
+          website: "Sister 2",
+          domain: "https://www.easyastro.in/sister2",
+          title: "Sister 2",
+          route: "lander5",
+        },
+      ],
+    },
+    {
+      id: "signature",
+      name: "Signature",
+      description: "Signature Studio websites and services",
       allowedRoles: ["admin", "signature"],
-    },
-    {
-      id: "#REC-048",
-      website: "Signature New",
-      domain: "https://www.thesignaturestudio.in/new",
-      title: "Signature New",
-      route: "lander42",
-      allowedRoles: ["admin", "signature"],
-    },
-    {
-      id: "#REC-049",
-      website: "Signature New 2",
-      domain: "https://www.thesignaturestudio.in/signature-new ",
-      title: "Signature New 2",
-      route: "rag",
-      allowedRoles: ["admin", "signature"],
-    },
-    {
-      id: "#REC-050",
-      website: "Easy Astro",
-      domain: "https://www.easyastro.in/",
-      title: "Easy Astro",
-      route: "lander3",
-      allowedRoles: ["admin", "astro"],
-    },
-    {
-      id: "#REC-051",
-      website: "Easy Astro Exp",
-      domain: "https://www.easyastro.in/exp",
-      title: "Easy Astro Exp",
-      route: "lander7",
-      allowedRoles: ["admin", "astro"],
-    },
-    {
-      id: "#REC-052",
-      website: "Sister",
-      domain: "https://www.easyastro.in/sister",
-      title: "Sister",
-      route: "lander3",
-      allowedRoles: ["admin", "astro"],
-    },
-    {
-      id: "#REC-053",
-      website: "Sister 2",
-      domain: "https://www.easyastro.in/sister2",
-      title: "Sister 2",
-      route: "lander5",
-      allowedRoles: ["admin", "astro"],
+      websites: [
+        {
+          id: "#REC-047",
+          website: "Signature Main",
+          domain: "https://www.thesignaturestudio.in/signature/",
+          title: "Signature Main",
+          route: "lander4",
+        },
+        {
+          id: "#REC-048",
+          website: "Signature New",
+          domain: "https://www.thesignaturestudio.in/new",
+          title: "Signature New",
+          route: "lander42",
+        },
+        {
+          id: "#REC-049",
+          website: "Signature New 2",
+          domain: "https://www.thesignaturestudio.in/signature-new ",
+          title: "Signature New 2",
+          route: "rag",
+        },
+      ],
     },
   ];
 
-  // Filter websites based on user role
-  const websites = allWebsites.filter((website) => {
+  // Filter categories based on user role
+  const accessibleCategories = websiteCategories.filter((category) => {
     if (!user || !user.role) return false;
-    return website.allowedRoles.includes(user.role.toLowerCase());
+    return category.allowedRoles.includes(user.role.toLowerCase());
   });
 
-  // Filter websites based on search and status
-  const filteredWebsites = websites.filter((website) => {
-    const matchesSearch =
-      website.website.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      website.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      website.domain.toLowerCase().includes(searchQuery.toLowerCase());
+  // Filter categories and their websites based on search and status
+  const filteredCategories = accessibleCategories.map((category) => {
+    const filteredWebsites = category.websites.filter((website) => {
+      const matchesSearch =
+        website.website.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        website.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        website.domain.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        category.name.toLowerCase().includes(searchQuery.toLowerCase());
 
-    // Since we don't have status field, always return true for status filter
-    const matchesStatus = statusFilter === "all";
+      // Since we don't have status field, always return true for status filter
+      const matchesStatus = statusFilter === "all";
 
-    return matchesSearch && matchesStatus;
-  });
+      return matchesSearch && matchesStatus;
+    });
 
-  // Sort websites
-  const sortedWebsites = [...filteredWebsites].sort((a, b) => {
-    switch (sortBy) {
-      case "name":
-        return a.website.localeCompare(b.website);
-      case "records":
-      case "completion":
-      case "recent":
-      default:
-        return a.website.localeCompare(b.website); // Default to alphabetical sort
-    }
-  });
+    return {
+      ...category,
+      websites: filteredWebsites,
+    };
+  }).filter((category) => category.websites.length > 0); // Only show categories that have websites after filtering
+
+  // Calculate total websites for display
+  const totalWebsites = filteredCategories.reduce((total, category) => total + category.websites.length, 0);
+  const totalAccessibleWebsites = accessibleCategories.reduce((total, category) => total + category.websites.length, 0);
+
+  // Navigate to category view
+  const viewCategory = (categoryId) => {
+    setCurrentView(categoryId);
+  };
+
+  // Navigate back to overview
+  const backToOverview = () => {
+    setCurrentView('overview');
+  };
+
+  // Get current category data
+  const currentCategory = filteredCategories.find(cat => cat.id === currentView);
 
   return (
     <div className="flex h-screen bg-background">
@@ -183,18 +212,32 @@ const Records = () => {
         {/* Header */}
         <header className="sticky top-0 z-10 glass-effect border-b border-border">
           <div className="flex h-16 items-center justify-between px-4 md:px-6">
-            <div className="flex-1 min-w-0">
-              <h1 className="text-xl md:text-2xl font-bold truncate">
-                Website Records
-              </h1>
-              <p className="text-sm text-muted-foreground hidden sm:block">
-                Manage and monitor all website records
-              </p>
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              {currentView !== 'overview' && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={backToOverview}
+                  className="p-2 hover:bg-gray-100"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                </Button>
+              )}
+              <div className="flex-1 min-w-0">
+                <h1 className="text-xl md:text-2xl font-bold truncate">
+                  {currentView === 'overview' ? 'Website Records' : currentCategory?.name}
+                </h1>
+                <p className="text-sm text-muted-foreground hidden sm:block">
+                  {currentView === 'overview' 
+                    ? 'Manage and monitor all website records' 
+                    : currentCategory?.description}
+                </p>
+              </div>
             </div>
             <div className="flex items-center gap-2 md:gap-3">
               <Button variant="outline" size="sm" className="hidden sm:flex border-gray-200 text-black hover:bg-gray-50">
                 <Download className="w-4 h-4 mr-2" />
-                Export All
+                Export {currentView === 'overview' ? 'All' : currentCategory?.name}
               </Button>
               <Button variant="outline" size="sm" className="sm:hidden border-gray-200 text-black hover:bg-gray-50">
                 <Download className="w-4 h-4" />
@@ -236,7 +279,10 @@ const Records = () => {
           {/* Results Summary */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
             <p className="text-sm text-gray-600">
-              Showing {sortedWebsites.length} of {websites.length} websites
+              {currentView === 'overview' 
+                ? `Showing ${totalWebsites} of ${totalAccessibleWebsites} websites across ${filteredCategories.length} categories`
+                : `Showing ${currentCategory?.websites.length} websites in ${currentCategory?.name} category`
+              }
             </p>
             <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
               <Activity className="w-3 h-3 sm:w-4 sm:h-4" />
@@ -244,96 +290,200 @@ const Records = () => {
             </div>
           </div>
 
-          {/* Website Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 animate-fade-in">
-            {sortedWebsites.map((website, index) => (
-              <Card
-                key={website.id}
-                className="hover:shadow-xl hover:scale-[1.02] transition-all duration-300 border border-gray-200 shadow-md bg-white group"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <CardHeader className="pb-3">
-                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-3 sm:space-y-0">
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <div className="p-2 bg-gray-100 rounded-lg flex-shrink-0">
-                        <Globe className="w-5 h-5 md:w-6 md:h-6 text-black" />
+          {/* Main Content Area */}
+          {currentView === 'overview' ? (
+            /* Overview - Category Cards */
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
+              {filteredCategories.map((category, categoryIndex) => (
+                <Card
+                  key={category.id}
+                  className="hover:shadow-xl hover:scale-[1.02] transition-all duration-300 border border-gray-200 shadow-md bg-white group cursor-pointer"
+                  style={{ animationDelay: `${categoryIndex * 0.1}s` }}
+                  onClick={() => viewCategory(category.id)}
+                >
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <div className="p-3 bg-gray-100 rounded-lg flex-shrink-0">
+                          <Globe className="w-6 h-6 md:w-8 md:h-8 text-black" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <CardTitle className="text-lg md:text-xl group-hover:text-gray-700 transition-colors text-black">
+                            {category.name}
+                          </CardTitle>
+                          <p className="text-sm text-gray-600 mt-1">
+                            {category.description}
+                          </p>
+                        </div>
                       </div>
-                      <div className="min-w-0 flex-1">
-                        <CardTitle className="text-base md:text-lg group-hover:text-gray-700 transition-colors truncate text-black">
-                          {website.website}
-                        </CardTitle>
+                      <div className="flex items-center gap-2">
+                        <Badge
+                          variant="outline"
+                          className="text-xs bg-gray-100 text-black border-gray-200"
+                        >
+                          {category.websites.length} website{category.websites.length !== 1 ? 's' : ''}
+                        </Badge>
+                        <ArrowUpRight className="w-5 h-5 text-gray-600" />
                       </div>
                     </div>
+                  </CardHeader>
 
-                    <div className="flex items-center gap-2 self-start sm:self-auto">
-                      <Badge
-                        variant="outline"
-                        className="text-xs bg-gray-100 text-black border-gray-200 whitespace-nowrap"
-                      >
-                        <Globe className="w-3 h-3" />
-                        <span className="ml-1 hidden sm:inline">Active</span>
-                      </Badge>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <MoreVertical className="w-4 h-4" />
-                      </Button>
+                  <CardContent>
+                    <p className="text-sm text-gray-600">
+                      Click to view all {category.name.toLowerCase()} websites
+                    </p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            /* Category Detail View */
+            <div className="space-y-6">
+              {/* Category Info Card */}
+              <Card className="border border-gray-200 shadow-sm bg-white">
+                <CardContent className="p-4 md:p-6">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-gray-100 rounded-lg">
+                      <Globe className="w-8 h-8 text-black" />
                     </div>
-                  </div>
-                </CardHeader>
-
-                <CardContent className="space-y-3 md:space-y-4">
-                  <p className="text-sm text-gray-600 line-clamp-2">
-                    {website.title} - Website record management
-                  </p>
-
-                  {/* Website Link */}
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
-                      <Globe className="w-4 h-4 text-black flex-shrink-0" />
-                      <a
-                        href={website.domain}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs text-gray-600 hover:underline truncate flex-1"
-                      >
-                        {website.domain}
-                      </a>
+                    <div>
+                      <h2 className="text-xl md:text-2xl font-semibold text-black">
+                        {currentCategory?.name}
+                      </h2>
+                      <p className="text-gray-600 mt-1">
+                        {currentCategory?.description}
+                      </p>
+                      <div className="flex items-center gap-4 mt-2">
+                        <Badge
+                          variant="outline"
+                          className="text-sm bg-gray-100 text-black border-gray-200"
+                        >
+                          {currentCategory?.websites.length} website{currentCategory?.websites.length !== 1 ? 's' : ''}
+                        </Badge>
+                        <span className="text-sm text-gray-500">
+                          All websites in this category
+                        </span>
+                      </div>
                     </div>
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="flex gap-2 pt-2">
-                    <Button
-                      size="sm"
-                      className="flex-1 group/btn text-sm bg-black hover:bg-gray-800 text-white"
-                      disabled={website.route === ""}
-                      onClick={() => {
-                        navigate(`/records/${website.route}?website=${website.domain}`);
-                      }}
-                    >
-                      <Eye className="w-4 h-4 mr-2" />
-                      <span className="hidden sm:inline">View Details</span>
-                      <span className="sm:hidden">View</span>
-                      <ArrowUpRight className="w-3 h-3 ml-1 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
-                    </Button>
                   </div>
                 </CardContent>
               </Card>
-            ))}
-          </div>
+
+              {/* Websites Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
+                {currentCategory?.websites.map((website, websiteIndex) => (
+                  <Card
+                    key={website.id}
+                    className="hover:shadow-xl hover:scale-[1.02] transition-all duration-300 border border-gray-200 shadow-md bg-white group"
+                    style={{ animationDelay: `${websiteIndex * 0.1}s` }}
+                  >
+                    <CardHeader className="pb-3">
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-3 sm:space-y-0">
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <div className="p-2 bg-gray-100 rounded-lg flex-shrink-0">
+                            <Globe className="w-5 h-5 md:w-6 md:h-6 text-black" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <CardTitle className="text-base md:text-lg group-hover:text-gray-700 transition-colors truncate text-black">
+                              {website.website}
+                            </CardTitle>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 self-start sm:self-auto">
+                          <Badge
+                            variant="outline"
+                            className="text-xs bg-gray-100 text-black border-gray-200 whitespace-nowrap"
+                          >
+                            <Globe className="w-3 h-3" />
+                            <span className="ml-1 hidden sm:inline">Active</span>
+                          </Badge>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <MoreVertical className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardHeader>
+
+                    <CardContent className="space-y-3 md:space-y-4">
+                      <p className="text-sm text-gray-600 line-clamp-2">
+                        {website.title} - Website record management
+                      </p>
+
+                      {/* Website Link */}
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
+                          <Globe className="w-4 h-4 text-black flex-shrink-0" />
+                          <a
+                            href={website.domain}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-gray-600 hover:underline truncate flex-1"
+                          >
+                            {website.domain}
+                          </a>
+                        </div>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex gap-2 pt-2">
+                        <Button
+                          size="sm"
+                          className="flex-1 group/btn text-sm bg-black hover:bg-gray-800 text-white"
+                          disabled={website.route === ""}
+                          onClick={() => {
+                            navigate(`/records/${website.route}?website=${website.domain}`);
+                          }}
+                        >
+                          <Eye className="w-4 h-4 mr-2" />
+                          <span className="hidden sm:inline">View Details</span>
+                          <span className="sm:hidden">View</span>
+                          <ArrowUpRight className="w-3 h-3 ml-1 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Empty State */}
-          {sortedWebsites.length === 0 && (
+          {filteredCategories.length === 0 && currentView === 'overview' && (
             <div className="text-center py-8 md:py-12 px-4">
               <Globe className="w-10 h-10 md:w-12 md:h-12 text-gray-600 mx-auto mb-4" />
               <h3 className="text-base md:text-lg font-medium mb-2 text-black">
-                No websites found
+                No categories found
               </h3>
               <p className="text-sm text-gray-600 mb-4">
                 Try adjusting your search or filter criteria
+              </p>
+              <Button
+                variant="outline"
+                className="border-gray-200 text-black hover:bg-gray-50"
+                onClick={() => {
+                  setSearchQuery("");
+                  setStatusFilter("all");
+                }}
+              >
+                Clear Filters
+              </Button>
+            </div>
+          )}
+
+          {/* Category Empty State */}
+          {currentView !== 'overview' && currentCategory?.websites.length === 0 && (
+            <div className="text-center py-8 md:py-12 px-4">
+              <Globe className="w-10 h-10 md:w-12 md:h-12 text-gray-600 mx-auto mb-4" />
+              <h3 className="text-base md:text-lg font-medium mb-2 text-black">
+                No websites found in {currentCategory?.name}
+              </h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Try adjusting your search criteria
               </p>
               <Button
                 variant="outline"
