@@ -137,14 +137,14 @@ const Records = () => {
           website: "Signature Main",
           domain: "https://www.thesignaturestudio.in/signature/",
           title: "Signature Main",
-          route: "lander4",
+          route: "lander42",
         },
         {
           id: "#REC-048",
           website: "Signature New",
           domain: "https://www.thesignaturestudio.in/new",
           title: "Signature New",
-          route: "lander42",
+          route: "",
         },
         {
           id: "#REC-049",
