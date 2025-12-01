@@ -365,6 +365,39 @@ const DetailPage = () => {
     }, 0).toFixed(2);
   };
 
+  // Function to send webhook with full order info
+  const handleYesClick = async (order) => {
+    try {
+      await fetch('https://automations.chatsonway.com/webhook/69254b511b9845c02d55251a', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          recordId: id,
+          website: websiteParam || null,
+          orderId: order.orderId,
+          name: order.name,
+          email: order.email,
+          phone: order.phone,
+          profession: order.profession,
+          remarks: order.remarks,
+          additionalProducts: order.additionalProducts,
+          amount: order.amount.replace('₹', '').replace(/,/g, ''),
+          orderDate: order.orderDate,
+          emailSent: true,
+          dob: order.dob,
+          gender: order.gender,
+          placeOfBirth: order.placeOfBirth,
+        }),
+      });
+
+      console.log('Webhook sent successfully for order:', order.orderId);
+    } catch (error) {
+      console.error('Error sending webhook for order:', order.orderId, error);
+    }
+  };
+
   // Function to mark email status as "no"
   const markEmailStatusAsNo = async (mongoId) => {
     if (!mongoId) {
@@ -403,11 +436,18 @@ const DetailPage = () => {
     }
   };
 
-  // Function to mark email status as "yes"
+  // Function to mark email status as "yes" (and send webhook for that order)
   const markEmailStatusAsYes = async (mongoId) => {
     if (!mongoId) {
       console.error('No MongoDB ID provided');
       return;
+    }
+
+    // Find the order in local state so we can send full info
+    const orderToSend = orderData.find(order => order.mongoId === mongoId);
+    if (orderToSend) {
+      // Fire and forget; if this fails, we still update status
+      handleYesClick(orderToSend);
     }
 
     try {
@@ -765,10 +805,20 @@ const DetailPage = () => {
                           {isSignatureRecord ? (
                             <>
                               <td className="p-3">
-                                <span className="text-sm text-muted-foreground whitespace-nowrap" title={order.profession || 'N/A'}>{order.profession || 'N/A'}</span>
+                                <span
+                                  className="text-sm text-muted-foreground whitespace-nowrap"
+                                  title={order.profession || 'N/A'}
+                                >
+                                  {order.profession || 'N/A'}
+                                </span>
                               </td>
                               <td className="p-3 max-w-xs">
-                                <span className="text-sm text-muted-foreground break-words whitespace-pre-wrap" title={order.remarks || 'N/A'}>{order.remarks || 'N/A'}</span>
+                                <span
+                                  className="text-sm text-muted-foreground break-words whitespace-pre-wrap"
+                                  title={order.remarks || 'N/A'}
+                                >
+                                  {order.remarks || 'N/A'}
+                                </span>
                               </td>
                             </>
                           ) : (
@@ -809,7 +859,10 @@ const DetailPage = () => {
                             <div className="flex items-center gap-2">
                               {order.isEmailSent === 'Yes' ? (
                                 <div className="flex items-center gap-2">
-                                  <Badge variant="default" className="bg-green-100 text-green-800 border-green-200">
+                                  <Badge
+                                    variant="default"
+                                    className="bg-green-100 text-green-800 border-green-200"
+                                  >
                                     Yes
                                   </Badge>
                                   {order.hasBackendData && order.mongoId && (
@@ -951,7 +1004,10 @@ const DetailPage = () => {
                             <span className="text-xs text-muted-foreground font-medium">Email Sent:</span>
                             {order.isEmailSent === 'Yes' ? (
                               <div className="flex items-center gap-2">
-                                <Badge variant="default" className="bg-green-100 text-green-800 border-green-200 text-xs">
+                                <Badge
+                                  variant="default"
+                                  className="bg-green-100 text-green-800 border-green-200 text-xs"
+                                >
                                   Yes
                                 </Badge>
                                 {order.hasBackendData && order.mongoId && (
