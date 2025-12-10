@@ -147,6 +147,13 @@ const Abandoned = () => {
           title: "Signature New 2",
           route: "rag",
         },
+        {
+          id: "#REC-050",
+          website: "Signature V2",
+          domain: "https://www.thesignaturestudio.in/signature-v2 ",
+          title: "Signature V2",
+          route: "rag-v2",
+        }
       ],
     },
   ];
