@@ -85,7 +85,7 @@ const Records = () => {
     },
     {
       id: "astro",
-      name: "Astro",
+      name: "Astro Soul",
       description: "Easy Astro websites and services",
       allowedRoles: ["admin", "astro"],
       websites: [
@@ -96,13 +96,13 @@ const Records = () => {
           title: "Soul Mate Sketch",
           route: "lander3",
         },
-        {
-          id: "#REC-050",
-          website: "Easy Astro",
-          domain: "https://www.easyastro.in/",
-          title: "Easy Astro",
-          route: "lander3",
-        },
+        // {
+        //   id: "#REC-050",
+        //   website: "Easy Astro",
+        //   domain: "https://www.easyastro.in/",
+        //   title: "Easy Astro",
+        //   route: "lander3",
+        // },
         {
           id: "#REC-051",
           website: "Easy Astro Exp",
@@ -123,6 +123,13 @@ const Records = () => {
           domain: "https://www.easyastro.in/sister2",
           title: "Sister 2",
           route: "lander5",
+        },
+          {
+          id: "#REC-054",
+          website: "Hindi",
+          domain: "https://www.easyastro.in/hindi",
+          title: "Hindi",
+          route: "lander12",
         },
       ],
     },
