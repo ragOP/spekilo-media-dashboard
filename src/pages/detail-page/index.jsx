@@ -63,11 +63,13 @@ const DetailPage = () => {
         setError(null);
         let url = "";
 
-        if (id === "rag" || id === "lander42" || id === "lander4" || id === "rag-v2") {
+        if (id === "rag" || id === "lander42" || id === "lander4" || id === "rag-v2" || id === "lander5") {
           if (id === "lander42" || id === "lander4") {
             url = `https://signature-backend-bm3q.onrender.com/api/lander4/get-orders/abd-main?page=${page}&limit=${limit}`;
           } else if (id === "rag-v2") {
             url = `https://signature-backend-bm3q.onrender.com/api/signature/rag-v2/get-orders/abd-main?page=${page}&limit=${limit}`;
+          } else if (id === "lander5") {
+            url = `https://signature-backend-bm3q.onrender.com/api/signature/lander5/get-orders/abd-main?page=${page}&limit=${limit}`;
           } else {
             url = `https://signature-backend-bm3q.onrender.com/api/signature/${id}/get-orders/abd-main?page=${page}&limit=${limit}`;
           }
