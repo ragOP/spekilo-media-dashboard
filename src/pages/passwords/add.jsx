@@ -83,7 +83,7 @@ const PasswordAdd = () => {
     setError('');
 
     try {
-      const response = await fetch('https://skyscale-be.onrender.com/api/auth/create-password', {
+      const response = await fetch('https://skyscale-be-cr0i.onrender.com/api/auth/create-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

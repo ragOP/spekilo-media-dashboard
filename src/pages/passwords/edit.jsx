@@ -62,7 +62,7 @@ const PasswordEdit = () => {
       setIsLoadingPassword(true);
       setError('');
       
-      const response = await fetch(`https://skyscale-be.onrender.com/api/auth/get-passwords`, {
+      const response = await fetch(`https://skyscale-be-cr0i.onrender.com/api/auth/get-passwords`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -138,7 +138,7 @@ const PasswordEdit = () => {
         others: formData.others
       };
 
-      const response = await fetch(`https://skyscale-be.onrender.com/api/auth/update-password/${id}`, {
+      const response = await fetch(`https://skyscale-be-cr0i.onrender.com/api/auth/update-password/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

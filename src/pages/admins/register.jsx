@@ -94,7 +94,7 @@ const AdminRegister = () => {
     setError('');
 
     try {
-      const response = await fetch('https://skyscale-be.onrender.com/api/auth/register', {
+      const response = await fetch('https://skyscale-be-cr0i.onrender.com/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

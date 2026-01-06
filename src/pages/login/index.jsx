@@ -24,7 +24,7 @@ const Login = () => {
     setError('');
 
     try {
-      const response = await fetch('https://skyscale-be.onrender.com/api/auth/login', {
+      const response = await fetch('https://skyscale-be-cr0i.onrender.com/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -68,7 +68,7 @@ const Passwords = () => {
       setIsLoading(true);
       setError('');
       
-      const response = await fetch('https://skyscale-be.onrender.com/api/auth/get-passwords', {
+      const response = await fetch('https://skyscale-be-cr0i.onrender.com/api/auth/get-passwords', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -97,7 +97,7 @@ const Passwords = () => {
     if (!passwordToDelete) return;
 
     try {
-      const response = await fetch(`https://skyscale-be.onrender.com/api/auth/delete-password/${passwordToDelete}`, {
+      const response = await fetch(`https://skyscale-be-cr0i.onrender.com/api/auth/delete-password/${passwordToDelete}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

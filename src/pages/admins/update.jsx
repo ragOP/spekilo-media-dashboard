@@ -61,7 +61,7 @@ const AdminUpdate = () => {
       setIsLoadingAdmin(true);
       setError('');
       
-      const response = await fetch(`https://skyscale-be.onrender.com/api/auth/get/${id}`, {
+      const response = await fetch(`https://skyscale-be-cr0i.onrender.com/api/auth/get/${id}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -148,7 +148,7 @@ const AdminUpdate = () => {
         updateData.password = formData.password;
       }
 
-      const response = await fetch(`https://skyscale-be.onrender.com/api/auth/update/${id}`, {
+      const response = await fetch(`https://skyscale-be-cr0i.onrender.com/api/auth/update/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

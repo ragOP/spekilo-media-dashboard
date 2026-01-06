@@ -116,10 +116,10 @@ const Dashboard = () => {
           signatureRes,
           signatureAbandonedRes
         ] = await Promise.all([
-          fetch('https://skyscale-be.onrender.com/api/auth/get-stats/record').catch(() => null),
-          fetch('https://skyscale-be.onrender.com/api/auth/get-stats/abandoned').catch(() => null),
-          fetch('https://signature-backend-bm3q.onrender.com/api/auth/get-stats/record').catch(() => null),
-          fetch('https://signature-backend-bm3q.onrender.com/api/auth/get-stats/abandoned').catch(() => null)
+          fetch('https://skyscale-be-cr0i.onrender.com/api/auth/get-stats/record').catch(() => null),
+          fetch('https://skyscale-be-cr0i.onrender.com/api/auth/get-stats/abandoned').catch(() => null),
+          fetch('https://signature-backend-x93b.onrender.com/api/auth/get-stats/record').catch(() => null),
+          fetch('https://signature-backend-x93b.onrender.com/api/auth/get-stats/abandoned').catch(() => null)
         ]);
 
         const [recordsJson, abandonedJson, signatureJson, signatureAbandonedJson] = await Promise.all([

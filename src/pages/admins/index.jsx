@@ -64,7 +64,7 @@ const Admins = () => {
       setIsLoading(true);
       setError('');
       
-      const response = await fetch('https://skyscale-be.onrender.com/api/auth/get-all', {
+      const response = await fetch('https://skyscale-be-cr0i.onrender.com/api/auth/get-all', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -93,7 +93,7 @@ const Admins = () => {
     if (!adminToDelete) return;
 
     try {
-      const response = await fetch(`https://skyscale-be.onrender.com/api/auth/delete/${adminToDelete}`, {
+      const response = await fetch(`https://skyscale-be-cr0i.onrender.com/api/auth/delete/${adminToDelete}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
